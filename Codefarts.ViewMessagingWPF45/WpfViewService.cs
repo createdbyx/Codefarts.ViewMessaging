@@ -5,7 +5,7 @@
     using System.ComponentModel;
     using System.Linq;
     using System.Reflection;
-    using System.Windows;           
+    using System.Windows;
 
     public class WpfViewService : IViewService, INotifyPropertyChanged
     {
@@ -20,7 +20,7 @@
         {
             return this.viewReferences[id];
         }
-                                           
+
         public bool DeleteView(Guid viewId)
         {
             return this.viewReferences.Remove(viewId);
@@ -28,14 +28,7 @@
 
         public IView CreateView(string path)
         {
-            //var existingView = this.viewReferences.Where(x => x.Value.ViewPath.Equals(path)).Select(x => x.Value).FirstOrDefault();
-            //if (existingView != null)
-            //{
-            //    return existingView;
-            //}
-
             // search through all assemblies
-            //  var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             var filteredAssemblies = assemblies.AsParallel().Where(this.FilterKnownLibraries);
 
