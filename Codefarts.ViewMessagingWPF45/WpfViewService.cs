@@ -14,14 +14,14 @@
             get { return this.viewReferences.Values; }
         }
 
-        private IDictionary<Guid, IView> viewReferences = new Dictionary<Guid, IView>();
+        private IDictionary<string, IView> viewReferences = new Dictionary<string, IView>();
 
-        public IView GetView(Guid id)
+        public IView GetView(string id)
         {
             return this.viewReferences[id];
         }
 
-        public bool DeleteView(Guid viewId)
+        public bool DeleteView(string viewId)
         {
             return this.viewReferences.Remove(viewId);
         }
@@ -60,7 +60,7 @@
 
         private bool ViewTypeAndNameMatch(Type x, string name)
         {
-            return x.Name.Equals(name) && x.IsInstanceOfType(typeof(FrameworkElement));
+            return x.Name.Equals(name) && x.IsSubclassOf(typeof(FrameworkElement));
         }
 
         private bool FilterKnownLibraries(Assembly x)

@@ -15,10 +15,10 @@
             }
         }
 
-        public static IDictionary<string, string> ShowDialog(Guid viewId)
+        public static IDictionary<string, string> ShowDialog(string viewId)
         {
             var arguments = new Dictionary<string, string>();
-            arguments["showdialog"] = viewId.ToString();
+            arguments["showdialog"] = viewId;
             return arguments;
         }
     }

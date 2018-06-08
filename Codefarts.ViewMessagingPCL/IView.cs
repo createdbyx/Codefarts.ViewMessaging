@@ -6,7 +6,7 @@
     public interface IView
     {
         string ViewPath { get; }
-        Guid ViewId { get; }
+        string ViewId { get; }
         object ViewReference { get; }
         void SendMessage(IDictionary<string, string> args);
     }
