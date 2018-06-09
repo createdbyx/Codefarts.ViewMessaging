@@ -31,7 +31,7 @@ namespace Codefarts.ViewMessaging
             this.viewPath = path;
         }
 
-        public void SendMessage(IDictionary<string, string> args)
+        public void SendMessage(IDictionary<string, object> args)
         {
             foreach (var pair in args)
             {
@@ -43,9 +43,22 @@ namespace Codefarts.ViewMessaging
                         break;
 
                     case "showdialog":
-                        this.DoShowDialog(pair.Value);
+                        this.DoShowDialog(pair.Value.ToString());
+                        break;
+
+                    case "setmodel":
+                        this.DoSetModel(pair.Value);
                         break;
                 }
+            }
+        }
+
+        private void DoSetModel(object model)
+        {
+            var ctrl = this.controlReference;
+            if (ctrl != null)
+            {
+                ctrl.DataContext = model;
             }
         }
 
