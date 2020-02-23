@@ -1,9 +1,8 @@
-﻿using System.Linq;
-
-namespace Codefarts.ViewMessaging
+﻿namespace Codefarts.ViewMessaging
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Windows;
 
     public class WpfView : IView
@@ -13,7 +12,10 @@ namespace Codefarts.ViewMessaging
 
         public string ViewPath
         {
-            get { return this.viewPath; }
+            get
+            {
+                return this.viewPath;
+            }
         }
 
         public string ViewId { get; }
@@ -35,18 +37,17 @@ namespace Codefarts.ViewMessaging
         {
             foreach (var pair in args)
             {
-                switch (pair.Key.ToLowerInvariant())
+                switch (pair.Key)
                 {
-                    case "show":
+                    case GenericMessageConstants.Show:
                         this.DoShowWindow();
-
                         break;
 
-                    case "showdialog":
+                    case GenericMessageConstants.ShowDialog:
                         this.DoShowDialog(pair.Value.ToString());
                         break;
 
-                    case "setmodel":
+                    case GenericMessageConstants.SetModel:
                         this.DoSetModel(pair.Value);
                         break;
                 }
@@ -66,7 +67,7 @@ namespace Codefarts.ViewMessaging
         {
             if (string.IsNullOrWhiteSpace(viewId))
             {
-                throw new ArgumentNullException("showdialog");
+                throw new ArgumentNullException(GenericMessageConstants.ShowDialog);
             }
 
             var thisWindow = this.controlReference as Window;

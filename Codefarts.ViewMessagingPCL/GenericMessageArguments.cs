@@ -24,7 +24,7 @@
             get
             {
                 var arguments = new Dictionary<string, object>();
-                arguments["show"] = string.Empty;
+                arguments[GenericMessageConstants.Show] = string.Empty;
                 return arguments;
             }
         }
@@ -32,14 +32,14 @@
         public static IDictionary<string, object> ShowDialog(string viewId)
         {
             var arguments = new Dictionary<string, object>();
-            arguments["showdialog"] = viewId;
+            arguments[GenericMessageConstants.ShowDialog] = viewId;
             return arguments;
         }
 
         public static IDictionary<string, object> SetModel(object model)
         {
             var arguments = new Dictionary<string, object>();
-            arguments["setmodel"] = model;
+            arguments[GenericMessageConstants.SetModel] = model;
             return arguments;
         }
     }
