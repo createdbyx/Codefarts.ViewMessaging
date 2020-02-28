@@ -9,6 +9,7 @@
     {
         private readonly string viewPath;
         private FrameworkElement controlReference;
+        private DataTemplate templateReference;
 
         public string ViewPath
         {
@@ -18,19 +19,82 @@
             }
         }
 
-        public string ViewId { get; }
+        public IReadOnlyDictionary<string, object> Arguments
+        {
+            get; private set;
+        }
 
-        public WpfViewService ViewService { get; }
+        public string ViewId
+        {
+            get;
+        }
 
-        public object ViewReference { get; }
+        public WpfViewService ViewService
+        {
+            get;
+        }
+
+        public object ViewReference
+        {
+            get;
+        }
 
         public WpfView(WpfViewService viewService, FrameworkElement control, string path)
         {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException(nameof(path));
+            }
+
             this.ViewId = Guid.NewGuid().ToString("N");
-            this.ViewReference = control;
-            this.controlReference = control;
-            this.ViewService = viewService;
+            if (control != null)
+            {
+                this.ViewReference = control;
+                this.controlReference = control;
+            }
+
+            this.ViewService = viewService ?? throw new ArgumentNullException(nameof(viewService));
             this.viewPath = path;
+        }
+
+        public WpfView(WpfViewService viewService, DataTemplate template, string path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException(nameof(path));
+            }
+
+            this.ViewId = Guid.NewGuid().ToString("N");
+            if (template != null)
+            {
+                this.ViewReference = template;
+                this.templateReference = template;
+            }
+
+            this.ViewService = viewService ?? throw new ArgumentNullException(nameof(viewService));
+            this.viewPath = path;
+        }
+
+        public WpfView(WpfViewService viewService, FrameworkElement control, string path, IReadOnlyDictionary<string, object> args)
+            : this(viewService, control, path)
+        {
+            this.Arguments = args;
+        }
+
+        public WpfView(WpfViewService viewService, DataTemplate template, string path, IReadOnlyDictionary<string, object> args)
+            : this(viewService, template, path)
+        {
+            this.Arguments = args;
         }
 
         public void SendMessage(IDictionary<string, object> args)
@@ -69,6 +133,10 @@
             {
                 throw new ArgumentNullException(GenericMessageConstants.ShowDialog);
             }
+
+            var ctrl = this.controlReference;
+            if (ctrl == null)
+                return;
 
             var thisWindow = this.controlReference as Window;
             var dialogView = this.ViewService.Views.FirstOrDefault(x => x.ViewId.Equals(viewId, StringComparison.OrdinalIgnoreCase));

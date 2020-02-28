@@ -1,4 +1,6 @@
-﻿namespace Codefarts.ViewMessaging
+﻿using System.Collections.ObjectModel;
+
+namespace Codefarts.ViewMessaging
 {
     using System;
     using System.Collections.Generic;
@@ -9,15 +11,14 @@
 
     public class WpfViewService : IViewService, INotifyPropertyChanged
     {
-        private static readonly Dictionary<string, Type> previouslyCreatedViews = new Dictionary<string, Type>();
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="WpfViewService"/> class.
+        /// The cache of previously created view types.
         /// </summary>
-        public WpfViewService()
-        {
-            //  this.previouslyCreatedViews = new Dictionary<string, Type>();
-        }
+        /// <remarks>Only the type for the view is cached to prevent having to search thought the loaded assembly list to find it again.</remarks>
+        private static readonly Dictionary<string, Type> previouslyCreatedViews = new Dictionary<string, Type>();
+        private readonly IDictionary<string, IView> viewReferences = new Dictionary<string, IView>();
+        private string appendedName = "View";
+
 
         public IEnumerable<IView> Views
         {
@@ -26,9 +27,6 @@
                 return this.viewReferences.Values;
             }
         }
-
-        private readonly IDictionary<string, IView> viewReferences = new Dictionary<string, IView>();
-        private string appendedName = "View";
 
         public string AppendedName
         {
@@ -60,58 +58,132 @@
 
         public IView CreateView(string path)
         {
+            return CreateView(path, null);
+        }
+
+        private T GetArgumentValue<T>(IDictionary<string, object> dictionary, string key)
+        {
+            var defaultValue = default(T);
+            object value;
+            if (dictionary != null && dictionary.TryGetValue(key, out value))
+            {
+                defaultValue = (T)value;
+            }
+
+            return defaultValue;
+        }
+
+        public IView CreateView(string path, IDictionary<string, object> args)
+        {
+            var isDataTemplate = this.GetArgumentValue<bool>(args, "IsDataTemplate");
+            var cacheView = this.GetArgumentValue<bool>(args, "CacheView");
+            var name = path + this.appendedName;
+
             if (previouslyCreatedViews.ContainsKey(path))
             {
                 var firstView = previouslyCreatedViews[path];
-                var item = firstView != null ? firstView.Assembly.CreateInstance(firstView.FullName) : null;
-                if (item != null)
+                if (isDataTemplate)
                 {
-                    var element = item as FrameworkElement;
-                    var newView = new WpfView(this, element, path);
-                    this.viewReferences.Add(newView.ViewId, newView);
-                    return newView;
-                }
-            }
-
-            // search through all assemblies
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var filteredAssemblies = assemblies.AsParallel().Where(this.FilterKnownLibraries);
-
-            foreach (var asm in filteredAssemblies)
-            {
-                var types = asm.GetTypes().AsParallel();
-                var name = path + this.appendedName;
-                var views = types.Where(x => this.ViewTypeAndNameMatch(x, name));
-
-                try
-                {
-                    var firstView = views.FirstOrDefault();
-                    var item = firstView != null ? asm.CreateInstance(firstView.FullName) : null;
+                    var item = firstView != null ? Application.Current.TryFindResource(name) : null;
                     if (item != null)
                     {
-                        var element = item as FrameworkElement;
-                        var newView = new WpfView(this, element, path);
+                        var element = item as DataTemplate;
+                        var newView = new WpfView(this, element, path, args == null ? null : new ReadOnlyDictionary<string, object>(args));
                         this.viewReferences.Add(newView.ViewId, newView);
-                        // successfully created  so add type to cache for faster access
-                        lock (previouslyCreatedViews)
-                        {
-                            previouslyCreatedViews[path] = firstView;
-                        }
-
                         return newView;
                     }
                 }
-                catch
+                else
                 {
+                    var item = firstView != null ? firstView.Assembly.CreateInstance(firstView.FullName) : null;
+                    if (item != null)
+                    {
+                        var element = item as FrameworkElement;
+                        var newView = new WpfView(this, element, path, args == null ? null : new ReadOnlyDictionary<string, object>(args));
+                        this.viewReferences.Add(newView.ViewId, newView);
+                        return newView;
+                    }
+                }
+            }
+
+            if (isDataTemplate)
+            {
+                object item = null;
+                item = Application.Current.TryFindResource(name);
+                if (item != null)
+                {
+                    var element = item as DataTemplate;
+                    var newView = new WpfView(this, element, path, args == null ? null : new ReadOnlyDictionary<string, object>(args));
+                    this.viewReferences.Add(newView.ViewId, newView);
+
+                    // successfully created  so add type to cache for faster access
+                    if (cacheView)
+                    {
+                        lock (previouslyCreatedViews)
+                        {
+                            previouslyCreatedViews[path] = element.DataType as Type;
+                        }
+                    }
+
+                    return newView;
+                }
+            }
+            else
+            {
+                // search through all assemblies
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                var filteredAssemblies = assemblies.AsParallel().Where(this.FilterKnownLibraries);
+
+                foreach (var asm in filteredAssemblies)
+                {
+                    var types = asm.GetTypes().AsParallel();
+                    var views = types.Where(x => this.ViewTypeAndNameMatch(x, name, isDataTemplate));
+
+                    try
+                    {
+                        var firstView = views.FirstOrDefault();
+                        var item = firstView != null ? asm.CreateInstance(firstView.FullName) : null;
+
+                        if (item != null)
+                        {
+                            var element = item as FrameworkElement;
+                            var newView = new WpfView(this, element, path, args == null ? null : new ReadOnlyDictionary<string, object>(args));
+                            this.viewReferences.Add(newView.ViewId, newView);
+
+                            // successfully created  so add type to cache for faster access
+                            if (cacheView)
+                            {
+                                lock (previouslyCreatedViews)
+                                {
+                                    previouslyCreatedViews[path] = firstView;
+                                }
+                            }
+
+                            return newView;
+                        }
+                    }
+                    catch
+                    {
+                    }
                 }
             }
 
             return null;
         }
 
-        private bool ViewTypeAndNameMatch(Type x, string name)
+        private bool ViewTypeAndNameMatch(Type x, string name, bool isDataTemplate)
         {
-            return x.Name.Equals(name) && x.IsSubclassOf(typeof(FrameworkElement));
+            if (x.Name.Equals(name))
+            {
+                if (isDataTemplate)
+                {
+                    return x.IsSubclassOf(typeof(DataTemplate));
+                }
+
+                return x.IsSubclassOf(typeof(FrameworkElement));
+            }
+
+            return false;
         }
 
         private bool FilterKnownLibraries(Assembly x)
