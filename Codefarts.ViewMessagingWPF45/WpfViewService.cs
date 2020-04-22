@@ -149,46 +149,36 @@ namespace Codefarts.ViewMessaging
             var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             // get all assemblies
-            var files = Directory.GetFiles(appPath, "*.dll", SearchOption.AllDirectories);
+            var viewFiles = Directory.GetFiles(appPath, "*.cviews", SearchOption.AllDirectories);
 
             // check each file
-            foreach (var file in files)
+            foreach (var file in viewFiles)
             {
-                var ad = AppDomain.CreateDomain("TempViewMessagingDomain");
+                var asmFile = Path.ChangeExtension(file, ".dll");
+                if (!File.Exists(asmFile))
+                {
+                    continue;
+                }
 
-                //AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
-                //{
-                //    return null;
-                //};
-
-                //AppDomain.CurrentDomain.TypeResolve += (s, e) =>
-                //{
-                //    return null;
-                //};
-
-                //ad.AssemblyResolve += (s, e) =>
-                //{
-                //    return null;
-                //};
-
-                //ad.TypeResolve += (s, e) =>
-                //{
-                //    return null;
-                //};
-
-                var symbolFile = Path.ChangeExtension(file, ".pdb");
-
-                var rawAssembly = File.ReadAllBytes(file);
-                var rawSymbolStore = File.Exists(symbolFile) ? File.ReadAllBytes(symbolFile) : null;
-
-                var assembly = rawSymbolStore == null ? ad.Load(rawAssembly) : ad.Load(rawAssembly, rawSymbolStore);
+                Assembly assembly = null;
+                try
+                {
+                    var ad = AppDomain.CreateDomain("TempViewMessagingDomain");
+                    var symbolFile = Path.ChangeExtension(asmFile, ".pdb");
+                    var rawAssembly = File.ReadAllBytes(asmFile);
+                    var rawSymbolStore = File.Exists(symbolFile) ? File.ReadAllBytes(symbolFile) : null;
+                    assembly = rawSymbolStore == null ? ad.Load(rawAssembly) : ad.Load(rawAssembly, rawSymbolStore);
+                    AppDomain.Unload(ad);
+                }
+                catch
+                {
+                    continue;
+                }
 
                 if (this.GetViewType(path, args, assembly, name, isDataTemplate, cacheView, out var wpfView))
                 {
                     return wpfView;
                 }
-
-                AppDomain.Unload(ad);
             }
 
             return null;
