@@ -58,6 +58,7 @@ namespace Codefarts.ViewMessaging
         public IView CreateView(string viewName)
         {
             return CreateView(viewName, null);
+            return CreateView(viewName, new ViewArguments());
         }
 
         public IView CreateView(string viewName, ViewArguments args)
