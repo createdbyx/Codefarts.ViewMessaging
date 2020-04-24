@@ -7,7 +7,12 @@
     /// Provides a readonly collection of named arguments.
     /// </summary>
     public class ViewArguments : ReadOnlyDictionary<string, object>
-    { 
+    {
+        /// <summary>Initializes a new instance of the <see cref="ViewArguments" /> class.</summary>
+        public ViewArguments() : base(new Dictionary<string, object>())
+        {
+        }
+
         /// <inheritdoc />
         public ViewArguments(IDictionary<string, object> dictionary) : base(dictionary)
         {
