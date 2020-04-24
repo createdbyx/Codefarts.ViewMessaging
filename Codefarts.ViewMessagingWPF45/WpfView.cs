@@ -50,7 +50,7 @@
 
             if (string.IsNullOrWhiteSpace(viewName))
             {
-                throw new ArgumentException(nameof(viewName));
+                throw new ArgumentException("No view name specified.", nameof(viewName));
             }
 
             this.ViewService = viewService ?? throw new ArgumentNullException(nameof(viewService));
@@ -74,7 +74,7 @@
 
             if (string.IsNullOrWhiteSpace(viewName))
             {
-                throw new ArgumentException("Missing view name.", nameof(viewName));
+                throw new ArgumentException("No view name specified.", nameof(viewName));
             }
 
             this.ViewService = viewService ?? throw new ArgumentNullException(nameof(viewService));
