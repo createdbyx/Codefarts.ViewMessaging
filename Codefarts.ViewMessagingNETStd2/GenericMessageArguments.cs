@@ -4,7 +4,7 @@
 
     public class GenericMessageArguments
     {
-        public static IDictionary<string, object> Build(params IDictionary<string, object>[] parts)
+        public static ViewArguments Build(params IDictionary<string, object>[] parts)
         {
             var args = new Dictionary<string, object>();
             foreach (var dictionary in parts)
@@ -15,7 +15,7 @@
                 }
             }
 
-            return args;
+            return new ViewArguments(args);
         }
 
 

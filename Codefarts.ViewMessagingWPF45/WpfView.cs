@@ -1,30 +1,31 @@
 ﻿namespace Codefarts.ViewMessaging
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Windows;
 
+    /// <summary>
+    /// Provides a <see cref="IView"/> implementation for a Wpf UI element.
+    /// </summary>
+    /// <seealso cref="Codefarts.ViewMessaging.IView" />
     public class WpfView : IView
     {
-        private readonly string viewPath;
         private FrameworkElement controlReference;
         private DataTemplate templateReference;
 
-        public string ViewPath
+        /// <inheritdoc />
+        public string ViewName
         {
-            get
-            {
-                return this.viewPath;
-            }
+            get;
         }
 
-        public IReadOnlyDictionary<string, object> Arguments
+        public ViewArguments Arguments
         {
             get; private set;
         }
 
-        public string ViewId
+        /// <inheritdoc />
+        public string Id
         {
             get;
         }
@@ -34,70 +35,74 @@
             get;
         }
 
+        /// <inheritdoc />
         public object ViewReference
         {
             get;
         }
 
-        public WpfView(WpfViewService viewService, FrameworkElement control, string path)
+        public WpfView(WpfViewService viewService, FrameworkElement control, string viewName)
         {
-            if (path == null)
+            if (viewName == null)
             {
-                throw new ArgumentNullException(nameof(path));
+                throw new ArgumentNullException(nameof(viewName));
             }
 
-            if (string.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrWhiteSpace(viewName))
             {
-                throw new ArgumentException(nameof(path));
+                throw new ArgumentException(nameof(viewName));
             }
 
-            this.ViewId = Guid.NewGuid().ToString("N");
+            this.ViewService = viewService ?? throw new ArgumentNullException(nameof(viewService));
+
+            this.Id = Guid.NewGuid().ToString();
             if (control != null)
             {
                 this.ViewReference = control;
                 this.controlReference = control;
             }
 
-            this.ViewService = viewService ?? throw new ArgumentNullException(nameof(viewService));
-            this.viewPath = path;
+            this.ViewName = viewName;
         }
 
-        public WpfView(WpfViewService viewService, DataTemplate template, string path)
+        public WpfView(WpfViewService viewService, DataTemplate template, string viewName)
         {
-            if (path == null)
+            if (viewName == null)
             {
-                throw new ArgumentNullException(nameof(path));
+                throw new ArgumentNullException(nameof(viewName));
             }
 
-            if (string.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrWhiteSpace(viewName))
             {
-                throw new ArgumentException(nameof(path));
+                throw new ArgumentException("Missing view name.", nameof(viewName));
             }
 
-            this.ViewId = Guid.NewGuid().ToString("N");
+            this.ViewService = viewService ?? throw new ArgumentNullException(nameof(viewService));
+
+            this.Id = Guid.NewGuid().ToString();
             if (template != null)
             {
                 this.ViewReference = template;
                 this.templateReference = template;
             }
 
-            this.ViewService = viewService ?? throw new ArgumentNullException(nameof(viewService));
-            this.viewPath = path;
+            this.ViewName = viewName;
         }
 
-        public WpfView(WpfViewService viewService, FrameworkElement control, string path, IReadOnlyDictionary<string, object> args)
-            : this(viewService, control, path)
+        public WpfView(WpfViewService viewService, FrameworkElement control, string viewName, ViewArguments args)
+            : this(viewService, control, viewName)
         {
             this.Arguments = args;
         }
 
-        public WpfView(WpfViewService viewService, DataTemplate template, string path, IReadOnlyDictionary<string, object> args)
-            : this(viewService, template, path)
+        public WpfView(WpfViewService viewService, DataTemplate template, string viewName, ViewArguments args)
+            : this(viewService, template, viewName)
         {
             this.Arguments = args;
         }
 
-        public void SendMessage(IDictionary<string, object> args)
+        /// <inheritdoc />
+        public virtual void SendMessage(ViewArguments args)
         {
             foreach (var pair in args)
             {
@@ -118,7 +123,7 @@
             }
         }
 
-        private void DoSetModel(object model)
+        protected virtual void DoSetModel(object model)
         {
             var ctrl = this.controlReference;
             if (ctrl != null)
@@ -127,7 +132,7 @@
             }
         }
 
-        private void DoShowDialog(string viewId)
+        protected virtual void DoShowDialog(string viewId)
         {
             if (string.IsNullOrWhiteSpace(viewId))
             {
@@ -139,7 +144,7 @@
                 return;
 
             var thisWindow = this.controlReference as Window;
-            var dialogView = this.ViewService.Views.FirstOrDefault(x => x.ViewId.Equals(viewId, StringComparison.OrdinalIgnoreCase));
+            var dialogView = this.ViewService.Views.FirstOrDefault(x => x.Id.Equals(viewId, StringComparison.OrdinalIgnoreCase));
             var dialogWindow = dialogView.ViewReference as Window;
             if (thisWindow == null)
             {
@@ -156,8 +161,9 @@
             dialogWindow.ShowDialog();
         }
 
-        private void DoShowWindow()
+        protected virtual void DoShowWindow()
         {
+            // ReSharper disable once UsePatternMatching
             var ctrl = this.controlReference as Window;
             if (ctrl != null)
             {
