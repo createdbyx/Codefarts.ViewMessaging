@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfDataTemplate.cs" Link="WpfDataTemplate.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfView.cs" Link="WpfView.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfViewService.cs" Link="WpfViewService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Codefarts.ViewMessagingNETStd2\Codefarts.ViewMessagingNETStd2.csproj" />
+  </ItemGroup>
+
+</Project>
