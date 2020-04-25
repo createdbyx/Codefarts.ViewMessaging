@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.CodeDom;
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Codefarts.ViewMessaging
 {
@@ -22,6 +24,15 @@ namespace Codefarts.ViewMessaging
         private string appendedViewName = "View";
         private bool mVVMEnabled = false;
         private string appendedViewModelName = "ViewModel";
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WpfViewService"/> class.
+        /// </summary>
+        public WpfViewService()
+        {
+            var currentDomain = AppDomain.CurrentDomain;
+            currentDomain.AssemblyResolve += this.LoadFromSameFolder;
+        }
 
         public string AppendedViewModelName
         {
@@ -108,26 +119,26 @@ namespace Codefarts.ViewMessaging
             }
 
             var isDataTemplate = args.Get<bool>("IsDataTemplate");
-            var cacheView = args.Get("CacheView", true);
+            var useCache = args.Get("UseCache", true);
             var scanForAssemblies = args.Get("ScanAssemblies", true);
             var viewName = name + this.appendedViewName;
             var viewModelName = name + this.appendedViewModelName;
 
-            IView wpfView;
+            WpfView wpfView;
 
             // attempt to create from cache first
-            if (this.CreateFromCache(viewName, args, isDataTemplate, name, out wpfView))
+            if (this.CreateViewFromCache(viewName, args, isDataTemplate, name, out wpfView))
             {
-                this.ResolveViewModel(viewModelName, wpfView);
+                this.ResolveViewModel(viewModelName, wpfView, scanForAssemblies, useCache);
                 return wpfView;
             }
 
             // if not in cache scan for
-            if (!this.ScanDomainForView(viewName, args, isDataTemplate, name, cacheView, out wpfView))
+            if (!this.ScanDomainForView(viewName, args, isDataTemplate, name, useCache, out wpfView))
             {
-                if (scanForAssemblies && this.SearchAppFolderForAssemblies(viewName, args, name, isDataTemplate, cacheView, out wpfView))
+                if (scanForAssemblies && this.SearchForViewAssemblies(viewName, args, isDataTemplate, useCache, out wpfView))
                 {
-                    this.ResolveViewModel(viewModelName, wpfView);
+                    this.ResolveViewModel(viewModelName, wpfView, scanForAssemblies, useCache);
                     return wpfView;
                 }
             }
@@ -135,8 +146,13 @@ namespace Codefarts.ViewMessaging
             return null;
         }
 
-        private void ResolveViewModel(string viewModelName, IView wpfView)
+        private void ResolveViewModel(string viewModelName, WpfView wpfView, bool scanForAssemblies, bool cacheViewModel)
         {
+            if (!this.mVVMEnabled)
+            {
+                return;
+            }
+
             if (viewModelName == null)
             {
                 throw new ArgumentNullException(nameof(viewModelName));
@@ -147,15 +163,92 @@ namespace Codefarts.ViewMessaging
                 throw new ArgumentNullException(nameof(wpfView));
             }
 
-            if (!this.mVVMEnabled)
+            var setContextCallback = new Action<WpfView, object>((view, viewModel) =>
+             {
+                 var dic = new Dictionary<string, object>(view.Arguments);
+                 dic["ViewModel"] = viewModel;
+                 view.Arguments = new ViewArguments(dic);
+                 if (view.ViewReference is FrameworkElement element)
+                 {
+                     element.DataContext = viewModel;
+                 }
+             });
+
+            // attempt to create from cache first
+            object viewModelRef;
+            if (this.CreateViewModelFromCache(viewModelName, wpfView, out viewModelRef))
             {
+                setContextCallback(wpfView, viewModelRef);
                 return;
             }
 
-            // wpfView.
+            // if not in cache scan for
+            if (!this.ScanDomainForViewModel(viewModelName, cacheViewModel, out viewModelRef))
+            {
+                if (scanForAssemblies && this.SearchForViewModelAssemblies(viewModelName, cacheViewModel, out viewModelRef))
+                {
+                    setContextCallback(wpfView, viewModelRef);
+                }
+            }
         }
 
-        private bool ScanDomainForView(string viewName, ViewArguments args, bool isDataTemplate, string name, bool cacheView, out IView wpfView)
+        private bool ScanDomainForViewModel(string viewName, bool cacheViewModel, out object viewModelRef)
+        {
+            // search through all loaded assemblies
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var filteredAssemblies = assemblies.AsParallel().Where(this.FilterKnownLibraries);
+
+            foreach (var asm in filteredAssemblies)
+            {
+                if (this.GetViewModelFromAssembly(viewName, asm, cacheViewModel, out viewModelRef))
+                {
+                    return true;
+                }
+            }
+
+            viewModelRef = null;
+            return false;
+        }
+
+        private bool GetViewModelFromAssembly(string viewModelName, Assembly asm, bool cacheViewModel, out object viewModelRef)
+        {
+            if (asm == null)
+            {
+                throw new ArgumentNullException(nameof(asm));
+            }
+
+            var types = asm.GetTypes().AsParallel();
+            var viewModels = types.Where(x => x.IsClass && !x.IsAbstract && x != typeof(string) && x.Name.Equals(viewModelName, StringComparison.Ordinal));
+
+            try
+            {
+                var firstViewModel = viewModels.FirstOrDefault();
+                var item = firstViewModel != null ? asm.CreateInstance(firstViewModel.FullName) : null;
+
+                if (item != null)
+                {
+                    // successfully created so add type to cache for faster access
+                    if (cacheViewModel)
+                    {
+                        lock (previouslyCreatedViewModels)
+                        {
+                            previouslyCreatedViewModels[viewModelName] = firstViewModel;
+                        }
+                    }
+
+                    viewModelRef = item;
+                    return true;
+                }
+            }
+            catch
+            {
+            }
+
+            viewModelRef = null;
+            return false;
+        }
+
+        private bool ScanDomainForView(string viewName, ViewArguments args, bool isDataTemplate, string name, bool cacheView, out WpfView wpfView)
         {
             wpfView = null;
             if (isDataTemplate)
@@ -219,7 +312,7 @@ namespace Codefarts.ViewMessaging
             return false;
         }
 
-        private bool CreateFromCache(string viewName, ViewArguments args, bool isDataTemplate, string dataTemplateName, out IView wpfView)
+        private bool CreateViewFromCache(string viewName, ViewArguments args, bool isDataTemplate, string dataTemplateName, out WpfView wpfView)
         {
             wpfView = null;
 
@@ -259,7 +352,38 @@ namespace Codefarts.ViewMessaging
             return false;
         }
 
-        private bool SearchAppFolderForAssemblies(string viewName, ViewArguments args, string name, bool isDataTemplate, bool cacheView, out IView wpfView)
+        private bool SearchForViewModelAssemblies(string viewName, bool cacheView, out object viewModelRef)
+        {
+            // ====== If we have made it here the view may be located in a currently unloaded assembly located in the app path
+
+            // search application path assemblies
+            // TODO: should use codebase? see https://stackoverflow.com/questions/837488/how-can-i-get-the-applications-path-in-a-net-console-application
+            var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            // get all assemblies
+            var viewModelFiles = Directory.GetFiles(appPath, "*.vmodels", SearchOption.AllDirectories);
+
+            // check each file
+            foreach (var file in viewModelFiles)
+            {
+                var asmFile = Path.ChangeExtension(file, ".dll");
+                if (!File.Exists(asmFile))
+                {
+                    continue;
+                }
+
+                var assembly = Assembly.LoadFile(asmFile);
+                if (this.GetViewModelFromAssembly(viewName, assembly, cacheView, out viewModelRef))
+                {
+                    return true;
+                }
+            }
+
+            viewModelRef = null;
+            return false;
+        }
+
+        private bool SearchForViewAssemblies(string viewName, ViewArguments args, bool isDataTemplate, bool cacheView, out WpfView wpfView)
         {
             // ====== If we have made it here the view may be located in a currently unloaded assembly located in the app path
 
@@ -279,21 +403,7 @@ namespace Codefarts.ViewMessaging
                     continue;
                 }
 
-                Assembly assembly = null;
-                try
-                {
-                    var currentDomain = AppDomain.CurrentDomain;
-                    currentDomain.AssemblyResolve += this.LoadFromSameFolder;
-
-                    assembly = Assembly.LoadFile(asmFile);
-
-                    currentDomain.AssemblyResolve -= this.LoadFromSameFolder;
-                }
-                catch
-                {
-                    continue;
-                }
-
+                var assembly = Assembly.LoadFile(asmFile);
                 if (this.GetViewType(viewName, args, assembly, isDataTemplate, cacheView, out wpfView))
                 {
                     return true;
@@ -307,18 +417,18 @@ namespace Codefarts.ViewMessaging
         private Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
         {
             var folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var allFiles = Directory.GetFiles(folderPath, "*.dll", SearchOption.AllDirectories);
-            var assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
-            if (!File.Exists(assemblyPath))
+            var filter = new AssemblyName(args.Name);
+            var fileMatches = Directory.GetFiles(folderPath, filter.Name + ".dll", SearchOption.AllDirectories);
+            var assemblyPath = fileMatches.FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(assemblyPath) || !File.Exists(assemblyPath))
             {
                 return null;
             }
 
-            var assembly = Assembly.LoadFrom(assemblyPath);
-            return assembly;
+            return Assembly.LoadFrom(assemblyPath);
         }
 
-        private bool GetViewType(string name, ViewArguments args, Assembly asm, bool isDataTemplate, bool cacheView, out IView wpfView)
+        private bool GetViewType(string name, ViewArguments args, Assembly asm, bool isDataTemplate, bool cacheView, out WpfView wpfView)
         {
             if (asm == null)
             {
