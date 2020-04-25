@@ -21,7 +21,7 @@
 
         public ViewArguments Arguments
         {
-            get; private set;
+            get; set;
         }
 
         /// <inheritdoc />
