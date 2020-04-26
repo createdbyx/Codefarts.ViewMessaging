@@ -1,4 +1,5 @@
-﻿namespace Codefarts.ViewMessaging
+﻿#if !NET20
+namespace Codefarts.ViewMessaging
 {
     public static class ExtensionMethods
     {
@@ -19,3 +20,4 @@
         }
     }
 }
+#endif
