@@ -41,28 +41,33 @@ namespace Codefarts.ViewMessaging
                  var dic = new Dictionary<string, object>(view.Arguments);
                  dic["ViewModel"] = viewModel;
                  view.Arguments = new ViewArguments(dic);
-                 if (view.ViewReference is FrameworkElement element)
-                 {
-                     element.DataContext = viewModel;
-                 }
 
-                 // TODO: need to implement way of setting view model for data templates
+                 if (view.ViewReference is FrameworkElement)
+                 {
+                     ((FrameworkElement)view.ViewReference).DataContext = viewModel;
+                 }
+                 else if (view.ViewReference is DataTemplate)
+                 {
+                     // TODO: need to implement way of setting view model for data templates
+                     throw new NotImplementedException();
+                 }
              });
 
             // attempt to create from cache first
             object viewModelRef;
-            if (this.CreateViewModelFromCache(viewModelName, wpfView, out viewModelRef))
+            if (this.CreateViewModelFromCache(viewModelName, wpfView, cacheViewModel, out viewModelRef))
             {
                 setContextCallback(wpfView, viewModelRef);
                 return;
             }
 
-            // if not in cache scan for                                                                   
+            // if not in cache scan for
             if (!this.ScanDomainForViewModel(viewModelName, cacheViewModel, out viewModelRef))
             {
                 if (scanForAssemblies && this.SearchForViewModelAssemblies(viewModelName, cacheViewModel, out viewModelRef))
                 {
                     setContextCallback(wpfView, viewModelRef);
+                    return;
                 }
             }
 
@@ -166,34 +171,16 @@ namespace Codefarts.ViewMessaging
             return false;
         }
 
-        private bool CreateViewModelFromCache(string name, IView wpfView, out object viewModelRef)
+        private bool CreateViewModelFromCache(string name, IView wpfView, bool cacheView, out object viewModelRef)
         {
             if (previouslyCreatedViewModels.ContainsKey(name))
             {
                 var viewModelType = previouslyCreatedViewModels[name];
-                
-                // try event first that way consumers could use IoC container and dependance injection if need be
-                viewModelRef = viewModelType != null ? this.OnViewModelTypeResolve(new ResolveEventArgs(viewModelType)) : null;
 
-                // if null attempt direct type creation fallback
-                if (viewModelRef == null)
+                if (this.GetViewModelFromAssembly(name, viewModelType.Assembly, cacheView, out viewModelRef))
                 {
-                    viewModelRef = viewModelType != null ? viewModelType.Assembly.CreateInstance(viewModelType.FullName) : null;
+                    return true;
                 }
-
-                if (viewModelRef != null)
-                {
-                    if (wpfView.ViewReference is FrameworkElement)
-                    {
-                        ((FrameworkElement)wpfView.ViewReference).DataContext = viewModelRef;
-                    }
-                    else if (wpfView.ViewReference is DataTemplate)
-                    {
-                        throw new NotImplementedException();
-                    }
-                }
-
-                return true;
             }
 
             viewModelRef = null;
