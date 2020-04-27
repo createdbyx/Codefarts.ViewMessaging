@@ -1,17 +1,20 @@
-﻿using System.CodeDom;
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
+﻿// <copyright file="WpfViewService.cs" company="Codefarts">
+// Copyright (c) Codefarts
+// </copyright>
 
 namespace Codefarts.ViewMessaging
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Windows;
 
+    /// <summary>
+    /// Provides an implementation of <see cref="IViewService"/> for windows presentation foundation.
+    /// </summary>
     public class WpfViewService : IViewService, INotifyPropertyChanged
     {
         /// <summary>
@@ -19,21 +22,34 @@ namespace Codefarts.ViewMessaging
         /// </summary>
         /// <remarks>Only the type for the view is cached to prevent having to search thought the loaded assembly list to find it again.</remarks>
         private static readonly Dictionary<string, Type> previouslyCreatedViews = new Dictionary<string, Type>();
-        private static readonly Dictionary<string, Type> previouslyCreatedViewModels = new Dictionary<string, Type>();
         private readonly IDictionary<string, IView> viewReferences = new Dictionary<string, IView>();
         private string appendedViewName = "View";
         private bool mVVMEnabled = false;
         private string appendedViewModelName = "ViewModel";
+        private ViewModelResolver vmResolver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WpfViewService"/> class.
         /// </summary>
         public WpfViewService()
         {
-            var currentDomain = AppDomain.CurrentDomain;
-            currentDomain.AssemblyResolve += this.LoadFromSameFolder;
+            this.vmResolver = new ViewModelResolver();
+            this.vmResolver.ViewModelTypeResolve += (s, e) => this.OnViewModelTypeResolve(e);
         }
 
+        /// <summary>
+        /// Occurs when a view model type needs to be resolved.
+        /// </summary>
+        public event ResolveEventHandler ViewModelTypeResolve;
+
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets or sets the string that is appended to the view model name.
+        /// </summary>
         public string AppendedViewModelName
         {
             get
@@ -52,7 +68,10 @@ namespace Codefarts.ViewMessaging
             }
         }
 
-        public bool MVVMEnabled
+        /// <summary>
+        /// Gets or sets weather MVVM style view creation should be used.
+        /// </summary>
+        public bool MvvmEnabled
         {
             get
             {
@@ -65,11 +84,12 @@ namespace Codefarts.ViewMessaging
                 if (currentValue != value)
                 {
                     this.mVVMEnabled = value;
-                    this.OnPropertyChanged(nameof(this.MVVMEnabled));
+                    this.OnPropertyChanged(nameof(this.MvvmEnabled));
                 }
             }
         }
 
+        /// <inheritdoc/>
         public IEnumerable<IView> Views
         {
             get
@@ -96,21 +116,25 @@ namespace Codefarts.ViewMessaging
             }
         }
 
+        /// <inheritdoc/>
         public IView GetView(string id)
         {
             return this.viewReferences[id];
         }
 
+        /// <inheritdoc/>
         public bool DeleteView(string id)
         {
             return this.viewReferences.Remove(id);
         }
 
+        /// <inheritdoc/>
         public IView CreateView(string name)
         {
             return CreateView(name, new ViewArguments());
         }
 
+        /// <inheritdoc/>
         public IView CreateView(string name, ViewArguments args)
         {
             if (args == null)
@@ -129,7 +153,11 @@ namespace Codefarts.ViewMessaging
             // attempt to create from cache first
             if (this.CreateViewFromCache(viewName, args, isDataTemplate, name, out wpfView))
             {
-                this.ResolveViewModel(viewModelName, wpfView, scanForAssemblies, useCache);
+                if (this.mVVMEnabled)
+                {
+                    this.vmResolver.ResolveViewModel(viewModelName, wpfView, scanForAssemblies, useCache);
+                }
+
                 return wpfView;
             }
 
@@ -138,114 +166,16 @@ namespace Codefarts.ViewMessaging
             {
                 if (scanForAssemblies && this.SearchForViewAssemblies(viewName, args, isDataTemplate, useCache, out wpfView))
                 {
-                    this.ResolveViewModel(viewModelName, wpfView, scanForAssemblies, useCache);
+                    if (this.mVVMEnabled)
+                    {
+                        this.vmResolver.ResolveViewModel(viewModelName, wpfView, scanForAssemblies, useCache);
+                    }
+
                     return wpfView;
                 }
             }
 
             return null;
-        }
-
-        private void ResolveViewModel(string viewModelName, WpfView wpfView, bool scanForAssemblies, bool cacheViewModel)
-        {
-            if (!this.mVVMEnabled)
-            {
-                return;
-            }
-
-            if (viewModelName == null)
-            {
-                throw new ArgumentNullException(nameof(viewModelName));
-            }
-
-            if (wpfView == null)
-            {
-                throw new ArgumentNullException(nameof(wpfView));
-            }
-
-            var setContextCallback = new Action<WpfView, object>((view, viewModel) =>
-             {
-                 var dic = new Dictionary<string, object>(view.Arguments);
-                 dic["ViewModel"] = viewModel;
-                 view.Arguments = new ViewArguments(dic);
-                 if (view.ViewReference is FrameworkElement element)
-                 {
-                     element.DataContext = viewModel;
-                 }
-             });
-
-            // attempt to create from cache first
-            object viewModelRef;
-            if (this.CreateViewModelFromCache(viewModelName, wpfView, out viewModelRef))
-            {
-                setContextCallback(wpfView, viewModelRef);
-                return;
-            }
-
-            // if not in cache scan for
-            if (!this.ScanDomainForViewModel(viewModelName, cacheViewModel, out viewModelRef))
-            {
-                if (scanForAssemblies && this.SearchForViewModelAssemblies(viewModelName, cacheViewModel, out viewModelRef))
-                {
-                    setContextCallback(wpfView, viewModelRef);
-                }
-            }
-        }
-
-        private bool ScanDomainForViewModel(string viewName, bool cacheViewModel, out object viewModelRef)
-        {
-            // search through all loaded assemblies
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var filteredAssemblies = assemblies.AsParallel().Where(this.FilterKnownLibraries);
-
-            foreach (var asm in filteredAssemblies)
-            {
-                if (this.GetViewModelFromAssembly(viewName, asm, cacheViewModel, out viewModelRef))
-                {
-                    return true;
-                }
-            }
-
-            viewModelRef = null;
-            return false;
-        }
-
-        private bool GetViewModelFromAssembly(string viewModelName, Assembly asm, bool cacheViewModel, out object viewModelRef)
-        {
-            if (asm == null)
-            {
-                throw new ArgumentNullException(nameof(asm));
-            }
-
-            var types = asm.GetTypes().AsParallel();
-            var viewModels = types.Where(x => x.IsClass && !x.IsAbstract && x != typeof(string) && x.Name.Equals(viewModelName, StringComparison.Ordinal));
-
-            try
-            {
-                var firstViewModel = viewModels.FirstOrDefault();
-                var item = firstViewModel != null ? asm.CreateInstance(firstViewModel.FullName) : null;
-
-                if (item != null)
-                {
-                    // successfully created so add type to cache for faster access
-                    if (cacheViewModel)
-                    {
-                        lock (previouslyCreatedViewModels)
-                        {
-                            previouslyCreatedViewModels[viewModelName] = firstViewModel;
-                        }
-                    }
-
-                    viewModelRef = item;
-                    return true;
-                }
-            }
-            catch
-            {
-            }
-
-            viewModelRef = null;
-            return false;
         }
 
         private bool ScanDomainForView(string viewName, ViewArguments args, bool isDataTemplate, string name, bool cacheView, out WpfView wpfView)
@@ -274,9 +204,11 @@ namespace Codefarts.ViewMessaging
             }
             else
             {
+                var filter = new Func<Assembly, bool>(x => !x.FullName.StartsWith("System") && !x.FullName.StartsWith("Microsoft"));
+
                 // search through all loaded assemblies
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                var filteredAssemblies = assemblies.AsParallel().Where(this.FilterKnownLibraries);
+                var filteredAssemblies = assemblies.AsParallel().Where(filter);
 
                 foreach (var asm in filteredAssemblies)
                 {
@@ -287,28 +219,6 @@ namespace Codefarts.ViewMessaging
                 }
             }
 
-            return false;
-        }
-
-        private bool CreateViewModelFromCache(string name, IView wpfView, out object viewModelRef)
-        {
-            if (previouslyCreatedViewModels.ContainsKey(name))
-            {
-                var viewModel = previouslyCreatedViewModels[name];
-                viewModelRef = viewModel != null ? viewModel.Assembly.CreateInstance(viewModel.FullName) : null;
-                if (wpfView.ViewReference is FrameworkElement)
-                {
-                    ((FrameworkElement)wpfView.ViewReference).DataContext = viewModelRef;
-                }
-                else if (wpfView.ViewReference is DataTemplate)
-                {
-                    throw new NotImplementedException();
-                }
-
-                return true;
-            }
-
-            viewModelRef = null;
             return false;
         }
 
@@ -352,37 +262,6 @@ namespace Codefarts.ViewMessaging
             return false;
         }
 
-        private bool SearchForViewModelAssemblies(string viewName, bool cacheView, out object viewModelRef)
-        {
-            // ====== If we have made it here the view may be located in a currently unloaded assembly located in the app path
-
-            // search application path assemblies
-            // TODO: should use codebase? see https://stackoverflow.com/questions/837488/how-can-i-get-the-applications-path-in-a-net-console-application
-            var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-            // get all assemblies
-            var viewModelFiles = Directory.GetFiles(appPath, "*.vmodels", SearchOption.AllDirectories);
-
-            // check each file
-            foreach (var file in viewModelFiles)
-            {
-                var asmFile = Path.ChangeExtension(file, ".dll");
-                if (!File.Exists(asmFile))
-                {
-                    continue;
-                }
-
-                var assembly = Assembly.LoadFile(asmFile);
-                if (this.GetViewModelFromAssembly(viewName, assembly, cacheView, out viewModelRef))
-                {
-                    return true;
-                }
-            }
-
-            viewModelRef = null;
-            return false;
-        }
-
         private bool SearchForViewAssemblies(string viewName, ViewArguments args, bool isDataTemplate, bool cacheView, out WpfView wpfView)
         {
             // ====== If we have made it here the view may be located in a currently unloaded assembly located in the app path
@@ -412,20 +291,6 @@ namespace Codefarts.ViewMessaging
 
             wpfView = null;
             return false;
-        }
-
-        private Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
-        {
-            var folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var filter = new AssemblyName(args.Name);
-            var fileMatches = Directory.GetFiles(folderPath, filter.Name + ".dll", SearchOption.AllDirectories);
-            var assemblyPath = fileMatches.FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(assemblyPath) || !File.Exists(assemblyPath))
-            {
-                return null;
-            }
-
-            return Assembly.LoadFrom(assemblyPath);
         }
 
         private bool GetViewType(string name, ViewArguments args, Assembly asm, bool isDataTemplate, bool cacheView, out WpfView wpfView)
@@ -485,14 +350,6 @@ namespace Codefarts.ViewMessaging
             return false;
         }
 
-        private bool FilterKnownLibraries(Assembly x)
-        {
-            return !x.FullName.StartsWith("System") && !x.FullName.StartsWith("Microsoft");
-        }
-
-        /// <summary>Occurs when a property value changes.</summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
         /// <summary>Called when [property changed].</summary>
         /// <param name="propertyName">Name of the property.</param>
         protected virtual void OnPropertyChanged(string propertyName)
@@ -502,6 +359,28 @@ namespace Codefarts.ViewMessaging
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        /// <summary>
+        /// Raises the <see cref="ViewModelTypeResolve"/> event and returns the result.
+        /// </summary>
+        /// <param name="args">The type creation args containing information about the type to create.</param>
+        /// <returns>An object reference that was create from the type information.</returns>
+        /// <remarks>If no event handlers are available will return null.</remarks>
+        protected virtual object OnViewModelTypeResolve(ResolveEventArgs args)
+        {
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
+            var handler = this.ViewModelTypeResolve;
+            if (handler != null)
+            {
+                return handler(this, args);
+            }
+
+            return null;
         }
     }
 }

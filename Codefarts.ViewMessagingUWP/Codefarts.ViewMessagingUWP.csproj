@@ -106,6 +106,9 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ExtensionMethods.cs">
+      <Link>ExtensionMethods.cs</Link>
+    </Compile>
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\GenericMessageArguments.cs">
       <Link>GenericMessageArguments.cs</Link>
     </Compile>
@@ -117,6 +120,9 @@
     </Compile>
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\IViewService.cs">
       <Link>IViewService.cs</Link>
+    </Compile>
+    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewArguments.cs">
+      <Link>ViewArguments.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Codefarts.ViewMessagingUWP.rd.xml" />

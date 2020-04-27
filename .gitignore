@@ -9,3 +9,9 @@ Codefarts.ViewMessagingNET45/bin/
 Codefarts.ViewMessagingUWP/bin/
 Codefarts.ViewMessagingWPF45/obj/
 Codefarts.ViewMessagingWPF46/obj/
+packages/
+Codefarts.ViewMessagingWpfNETCore31/obj/
+Codefarts.ViewMessagingWpfNETCore31/bin/
+Codefarts.ViewMessagingWPF45/bin/
+.vs/
+codealike.json

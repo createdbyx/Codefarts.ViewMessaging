@@ -52,6 +52,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\ResolveEventArgs.cs">
+      <Link>ResolveEventArgs.cs</Link>
+    </Compile>
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfDataTemplate.cs">
       <Link>WpfDataTemplate.cs</Link>
     </Compile>

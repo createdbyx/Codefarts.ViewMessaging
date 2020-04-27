@@ -1,17 +1,47 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyVersion>2020.4.27.2</AssemblyVersion>
+    <FileVersion>2020.4.27.2</FileVersion>
+    <RootNamespace>Codefarts.ViewMessaging</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\Exceptions\ViewModelNotResolvedException.cs" Link="Exceptions\ViewModelNotResolvedException.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\ResolveEventArgs.cs" Link="ResolveEventArgs.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\ViewModelResolver.cs" Link="ViewModelResolver.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfDataTemplate.cs" Link="WpfDataTemplate.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfView.cs" Link="WpfView.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfViewService.cs" Link="WpfViewService.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Codefarts.ViewMessagingNETStd2\Codefarts.ViewMessagingNETStd2.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
