@@ -30,7 +30,7 @@
             get;
         }
 
-        public WpfViewService ViewService
+        public IViewService ViewService
         {
             get;
         }
@@ -41,7 +41,7 @@
             get;
         }
 
-        public WpfView(WpfViewService viewService, FrameworkElement control, string viewName)
+        public WpfView(IViewService viewService, FrameworkElement control, string viewName)
         {
             if (viewName == null)
             {
@@ -65,7 +65,7 @@
             this.ViewName = viewName;
         }
 
-        public WpfView(WpfViewService viewService, DataTemplate template, string viewName)
+        public WpfView(IViewService viewService, DataTemplate template, string viewName)
         {
             if (viewName == null)
             {
@@ -89,13 +89,13 @@
             this.ViewName = viewName;
         }
 
-        public WpfView(WpfViewService viewService, FrameworkElement control, string viewName, ViewArguments args)
+        public WpfView(IViewService viewService, FrameworkElement control, string viewName, ViewArguments args)
             : this(viewService, control, viewName)
         {
             this.Arguments = args;
         }
 
-        public WpfView(WpfViewService viewService, DataTemplate template, string viewName, ViewArguments args)
+        public WpfView(IViewService viewService, DataTemplate template, string viewName, ViewArguments args)
             : this(viewService, template, viewName)
         {
             this.Arguments = args;
@@ -141,7 +141,9 @@
 
             var ctrl = this.controlReference;
             if (ctrl == null)
+            {
                 return;
+            }
 
             var thisWindow = this.controlReference as Window;
             var dialogView = this.ViewService.Views.FirstOrDefault(x => x.Id.Equals(viewId, StringComparison.OrdinalIgnoreCase));
@@ -155,7 +157,6 @@
             {
                 throw new NullReferenceException("Dialog view not a window.");
             }
-
 
             dialogWindow.Owner = thisWindow;
             dialogWindow.ShowDialog();

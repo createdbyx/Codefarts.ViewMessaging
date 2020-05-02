@@ -24,7 +24,7 @@ namespace Codefarts.ViewMessaging
         /// </summary>
         public event ResolveEventHandler ViewModelTypeResolve;
 
-        internal void ResolveViewModel(string viewModelName, WpfView wpfView, bool scanForAssemblies, bool cacheViewModel)
+        internal void ResolveViewModel(string viewModelName, IView wpfView, bool scanForAssemblies, bool cacheViewModel)
         {
             if (viewModelName == null)
             {
@@ -36,42 +36,35 @@ namespace Codefarts.ViewMessaging
                 throw new ArgumentNullException(nameof(wpfView));
             }
 
-            var setContextCallback = new Action<WpfView, object>((view, viewModel) =>
-             {
-                 var dic = new Dictionary<string, object>(view.Arguments);
-                 dic["ViewModel"] = viewModel;
-                 view.Arguments = new ViewArguments(dic);
-
-                 if (view.ViewReference is FrameworkElement)
-                 {
-                     ((FrameworkElement)view.ViewReference).DataContext = viewModel;
-                 }
-                 else if (view.ViewReference is DataTemplate)
-                 {
-                     // TODO: need to implement way of setting view model for data templates
-                     throw new NotImplementedException();
-                 }
-             });
-
-            // attempt to create from cache first
-            object viewModelRef;
-            if (this.CreateViewModelFromCache(viewModelName, wpfView, cacheViewModel, out viewModelRef))
+            try
             {
-                setContextCallback(wpfView, viewModelRef);
-                return;
-            }
-
-            // if not in cache scan for
-            if (!this.ScanDomainForViewModel(viewModelName, cacheViewModel, out viewModelRef))
-            {
-                if (scanForAssemblies && this.SearchForViewModelAssemblies(viewModelName, cacheViewModel, out viewModelRef))
+                // attempt to create from cache first
+                object viewModelRef;
+                if (this.CreateViewModelFromCache(viewModelName, wpfView, cacheViewModel, out viewModelRef))
                 {
-                    setContextCallback(wpfView, viewModelRef);
+                    wpfView.SendMessage(GenericMessageArguments.SetModel(viewModelRef));
                     return;
                 }
-            }
 
-            throw new ViewModelNotResolvedException("View model could not be resolved.", viewModelName);
+                // if not in cache scan for
+                if (this.ScanDomainForViewModel(viewModelName, cacheViewModel, out viewModelRef))
+                {
+                    wpfView.SendMessage(GenericMessageArguments.SetModel(viewModelRef));
+                    return;
+                }
+
+                if (scanForAssemblies && this.SearchForViewModelAssemblies(viewModelName, cacheViewModel, out viewModelRef))
+                {
+                    wpfView.SendMessage(GenericMessageArguments.SetModel(viewModelRef));
+                    return;
+                }
+
+                throw new ViewModelNotResolvedException("View model could not be resolved.", viewModelName);
+            }
+            catch (Exception ex)
+            {
+                throw new ViewModelNotResolvedException("View model could not be resolved.", viewModelName, ex);
+            }
         }
 
         private bool ScanDomainForViewModel(string viewName, bool cacheViewModel, out object viewModelRef)
@@ -104,36 +97,30 @@ namespace Codefarts.ViewMessaging
             var types = asm.GetTypes().AsParallel();
             var viewModels = types.Where(x => x.IsClass && !x.IsAbstract && x != typeof(string) && x.Name.Equals(viewModelName, StringComparison.Ordinal));
 
-            try
+            var firstViewModel = viewModels.FirstOrDefault();
+
+            // try event first that way consumers could use IoC container and dependance injection if need be
+            var item = firstViewModel != null ? this.OnViewModelTypeResolve(new ResolveEventArgs(firstViewModel)) : null;
+
+            // if null attempt direct type creation fallback
+            if (item == null)
             {
-                var firstViewModel = viewModels.FirstOrDefault();
-
-                // try event first that way consumers could use IoC container and dependance injection if need be
-                var item = firstViewModel != null ? this.OnViewModelTypeResolve(new ResolveEventArgs(firstViewModel)) : null;
-
-                // if null attempt direct type creation fallback
-                if (item == null)
-                {
-                    item = firstViewModel != null ? asm.CreateInstance(firstViewModel.FullName) : null;
-                }
-
-                if (item != null)
-                {
-                    // successfully created so add type to cache for faster access
-                    if (cacheViewModel)
-                    {
-                        lock (previouslyCreatedViewModels)
-                        {
-                            previouslyCreatedViewModels[viewModelName] = firstViewModel;
-                        }
-                    }
-
-                    viewModelRef = item;
-                    return true;
-                }
+                item = firstViewModel != null ? asm.CreateInstance(firstViewModel.FullName) : null;
             }
-            catch
+
+            if (item != null)
             {
+                // successfully created so add type to cache for faster access
+                if (cacheViewModel)
+                {
+                    lock (previouslyCreatedViewModels)
+                    {
+                        previouslyCreatedViewModels[viewModelName] = firstViewModel;
+                    }
+                }
+
+                viewModelRef = item;
+                return true;
             }
 
             viewModelRef = null;

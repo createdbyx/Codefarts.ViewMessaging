@@ -19,28 +19,28 @@
         }
 
 
-        public static IDictionary<string, object> Show
+        public static ViewArguments Show
         {
             get
             {
                 var arguments = new Dictionary<string, object>();
                 arguments[GenericMessageConstants.Show] = string.Empty;
-                return arguments;
+                return new ViewArguments(arguments);
             }
         }
 
-        public static IDictionary<string, object> ShowDialog(string viewId)
+        public static ViewArguments ShowDialog(string viewId)
         {
             var arguments = new Dictionary<string, object>();
             arguments[GenericMessageConstants.ShowDialog] = viewId;
-            return arguments;
+            return new ViewArguments(arguments);
         }
 
-        public static IDictionary<string, object> SetModel(object model)
+        public static ViewArguments SetModel(object model)
         {
             var arguments = new Dictionary<string, object>();
             arguments[GenericMessageConstants.SetModel] = model;
-            return arguments;
+            return new ViewArguments(arguments);
         }
     }
 }
