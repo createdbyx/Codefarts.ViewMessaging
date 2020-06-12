@@ -42,11 +42,5 @@
             this.ViewService = viewService;
             this.viewPath = path;
         }
-
-        /// <inheritdoc />
-        public void SendMessage(ViewArguments args)
-        {
-            // TODO: not yet implemented
-        }
     }
 }

@@ -1,7 +1,12 @@
-﻿namespace Codefarts.ViewMessaging
+﻿// <copyright file="WpfView.cs" company="Codefarts">
+// Copyright (c) Codefarts
+// contact@codefarts.com
+// http://www.codefarts.com
+// </copyright>
+
+namespace Codefarts.ViewMessaging
 {
     using System;
-    using System.Linq;
     using System.Windows;
 
     /// <summary>
@@ -99,77 +104,6 @@
             : this(viewService, template, viewName)
         {
             this.Arguments = args;
-        }
-
-        /// <inheritdoc />
-        public virtual void SendMessage(ViewArguments args)
-        {
-            foreach (var pair in args)
-            {
-                switch (pair.Key)
-                {
-                    case GenericMessageConstants.Show:
-                        this.DoShowWindow();
-                        break;
-
-                    case GenericMessageConstants.ShowDialog:
-                        this.DoShowDialog(pair.Value.ToString());
-                        break;
-
-                    case GenericMessageConstants.SetModel:
-                        this.DoSetModel(pair.Value);
-                        break;
-                }
-            }
-        }
-
-        protected virtual void DoSetModel(object model)
-        {
-            var ctrl = this.controlReference;
-            if (ctrl != null)
-            {
-                ctrl.DataContext = model;
-            }
-        }
-
-        protected virtual void DoShowDialog(string viewId)
-        {
-            if (string.IsNullOrWhiteSpace(viewId))
-            {
-                throw new ArgumentNullException(GenericMessageConstants.ShowDialog);
-            }
-
-            var ctrl = this.controlReference;
-            if (ctrl == null)
-            {
-                return;
-            }
-
-            var thisWindow = this.controlReference as Window;
-            var dialogView = this.ViewService.Views.FirstOrDefault(x => x.Id.Equals(viewId, StringComparison.OrdinalIgnoreCase));
-            var dialogWindow = dialogView.ViewReference as Window;
-            if (thisWindow == null)
-            {
-                throw new NullReferenceException("Parent view not a window.");
-            }
-
-            if (dialogWindow == null)
-            {
-                throw new NullReferenceException("Dialog view not a window.");
-            }
-
-            dialogWindow.Owner = thisWindow;
-            dialogWindow.ShowDialog();
-        }
-
-        protected virtual void DoShowWindow()
-        {
-            // ReSharper disable once UsePatternMatching
-            var ctrl = this.controlReference as Window;
-            if (ctrl != null)
-            {
-                ctrl.Show();
-            }
         }
     }
 }

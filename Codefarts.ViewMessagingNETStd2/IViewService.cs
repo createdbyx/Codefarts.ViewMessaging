@@ -1,5 +1,12 @@
-﻿namespace Codefarts.ViewMessaging
+﻿// <copyright file="IViewService.cs" company="Codefarts">
+// Copyright (c) Codefarts
+// contact@codefarts.com
+// http://www.codefarts.com
+// </copyright>
+
+namespace Codefarts.ViewMessaging
 {
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -8,8 +15,13 @@
     public interface IViewService
     {
         /// <summary>
+        /// Raised after a view is successfully created.
+        /// </summary>
+        event EventHandler<ViewCreatedEventArgs> ViewCreated;
+
+        /// <summary>
         /// Gets the views that have been created.
-        /// </summary>   
+        /// </summary>
         IEnumerable<IView> Views
         {
             get;
@@ -40,8 +52,34 @@
         /// Creates a view from a name.
         /// </summary>
         /// <param name="viewName">The name that identifies the view to be created.</param>
-        /// <param name="args"></param>
+        /// <param name="args">Arguments to be passed to the view.</param>
         /// <returns>A implementation of a <see cref="IView"/> interface.</returns>
         IView CreateView(string viewName, ViewArguments args);
+
+        /// <summary>
+        /// Registers a callback handler for creating a view.
+        /// </summary>
+        /// <param name="callback">The callback to be called.</param>
+        /// <remarks>Before invoking internal view creation implementors should defer creation by calling each registered callback until
+        /// a view is created. If no view was created fallback to internal view creation. This gives consumers ability to specify special
+        /// case view creation for whatever platform they running on.</remarks>
+        void RegisterHandler(Func<string, ViewArguments, IView> callback);
+
+        /// <summary>
+        /// Gets the message handlers.
+        /// </summary>
+        /// <remarks>a message handler is a platform specific implementation of the <see cref="IViewMessage"/> interface that is designed to handle messages sent to a <see cref="IView"/> implementation.</remarks>
+        IDictionary<string, IViewMessage> MessageHandlers
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Sends a the message to the view.
+        /// </summary>
+        /// <param name="message">The message identifier.</param>
+        /// <param name="view">The view to send the message to.</param>
+        /// <param name="args">The args to be passed to the message handler.</param>
+        void SendMessage(string message, IView view, ViewArguments args);
     }
 }

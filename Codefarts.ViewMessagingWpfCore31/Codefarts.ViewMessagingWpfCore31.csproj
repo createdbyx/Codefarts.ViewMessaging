@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>2020.4.27.2</AssemblyVersion>
-    <FileVersion>2020.4.27.2</FileVersion>
+    <AssemblyVersion>2020.5.16.1</AssemblyVersion>
+    <FileVersion>2020.5.16.1</FileVersion>
     <RootNamespace>Codefarts.ViewMessaging</RootNamespace>
   </PropertyGroup>
 
@@ -13,16 +13,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="stylecop.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="..\Codefarts.ViewMessagingWPF45\Exceptions\ViewModelNotResolvedException.cs" Link="Exceptions\ViewModelNotResolvedException.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\Message Handlers\RefreshMessage.cs" Link="Message Handlers\RefreshMessage.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\Message Handlers\SetModelMessage.cs" Link="Message Handlers\SetModelMessage.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\Message Handlers\ShowDialogMessage.cs" Link="Message Handlers\ShowDialogMessage.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\Message Handlers\ShowWindowMessage.cs" Link="Message Handlers\ShowWindowMessage.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingWPF45\Message Handlers\UpdateMessage.cs" Link="Message Handlers\UpdateMessage.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\ResolveEventArgs.cs" Link="ResolveEventArgs.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\ViewModelResolver.cs" Link="ViewModelResolver.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfDataTemplate.cs" Link="WpfDataTemplate.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfView.cs" Link="WpfView.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfViewService.cs" Link="WpfViewService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +47,7 @@
 
   <ItemGroup>
     <Folder Include="Exceptions\" />
+    <Folder Include="Message Handlers\" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

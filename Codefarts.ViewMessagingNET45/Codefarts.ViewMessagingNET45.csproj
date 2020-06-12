@@ -46,6 +46,9 @@
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\IView.cs">
       <Link>IView.cs</Link>
     </Compile>
+    <Compile Include="..\Codefarts.ViewMessagingNETStd2\IViewMessage.cs">
+      <Link>IViewMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\IViewService.cs">
       <Link>IViewService.cs</Link>
     </Compile>
@@ -55,6 +58,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <AdditionalFiles Include="..\stylecop.json">
+      <Link>stylecop.json</Link>
+    </AdditionalFiles>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

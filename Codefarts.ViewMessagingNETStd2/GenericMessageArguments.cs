@@ -19,20 +19,17 @@
         }
 
 
-        public static ViewArguments Show
+        public static ViewArguments Show()
         {
-            get
-            {
-                var arguments = new Dictionary<string, object>();
-                arguments[GenericMessageConstants.Show] = string.Empty;
-                return new ViewArguments(arguments);
-            }
+            var arguments = new Dictionary<string, object>();
+            arguments[GenericMessageConstants.Show] = string.Empty;
+            return new ViewArguments(arguments);
         }
 
         public static ViewArguments ShowDialog(string viewId)
         {
             var arguments = new Dictionary<string, object>();
-            arguments[GenericMessageConstants.ShowDialog] = viewId;
+            arguments[GenericMessageConstants.ViewId] = viewId;
             return new ViewArguments(arguments);
         }
 
@@ -42,5 +39,27 @@
             arguments[GenericMessageConstants.SetModel] = model;
             return new ViewArguments(arguments);
         }
+
+        public static ViewArguments SetParent(object model)
+        {
+            var arguments = new Dictionary<string, object>();
+            arguments[GenericMessageConstants.SetParent] = model;
+            return new ViewArguments(arguments);
+        }
+
+        public static ViewArguments Update()
+        {
+            var arguments = new Dictionary<string, object>();
+            arguments[GenericMessageConstants.Update] = default;
+            return new ViewArguments(arguments);
+        }
+
+        public static ViewArguments Refresh()
+        {
+            var arguments = new Dictionary<string, object>();
+            arguments[GenericMessageConstants.Refresh] = default;
+            return new ViewArguments(arguments);
+        }
+
     }
 }

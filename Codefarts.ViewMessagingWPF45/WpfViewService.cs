@@ -1,5 +1,7 @@
 ﻿// <copyright file="WpfViewService.cs" company="Codefarts">
 // Copyright (c) Codefarts
+// contact@codefarts.com
+// http://www.codefarts.com
 // </copyright>
 
 namespace Codefarts.ViewMessaging
@@ -11,6 +13,8 @@ namespace Codefarts.ViewMessaging
     using System.Linq;
     using System.Reflection;
     using System.Windows;
+    using System.Windows.Markup;
+    using Codefarts.ViewMessaging.Wpf;
 
     /// <summary>
     /// Provides an implementation of <see cref="IViewService"/> for windows presentation foundation.
@@ -27,14 +31,22 @@ namespace Codefarts.ViewMessaging
         private bool mVVMEnabled = false;
         private string appendedViewModelName = "ViewModel";
         private ViewModelResolver vmResolver;
+        private IDictionary<string, IViewMessage> messageHandlers = new Dictionary<string, IViewMessage>();
+        private List<Func<string, ViewArguments, IView>> handlerCallbacks;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WpfViewService"/> class.
         /// </summary>
         public WpfViewService()
         {
+            this.handlerCallbacks = new List<Func<string, ViewArguments, IView>>();
             this.vmResolver = new ViewModelResolver();
             this.vmResolver.ViewModelTypeResolve += (s, e) => this.OnViewModelTypeResolve(e);
+            this.messageHandlers[GenericMessageConstants.ShowDialog] = new ShowDialogMessage();
+            this.messageHandlers[GenericMessageConstants.Show] = new ShowWindowMessage();
+            this.messageHandlers[GenericMessageConstants.SetModel] = new SetModelMessage();
+            this.messageHandlers[GenericMessageConstants.Update] = new UpdateMessage();
+            this.messageHandlers[GenericMessageConstants.Refresh] = new RefreshMessage();
         }
 
         /// <summary>
@@ -46,6 +58,11 @@ namespace Codefarts.ViewMessaging
         /// Occurs when a property value changes.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Occurs every ime a view is created.
+        /// </summary>
+        public event EventHandler<ViewCreatedEventArgs> ViewCreated;
 
         /// <summary>
         /// Gets or sets the string that is appended to the view model name.
@@ -150,31 +167,71 @@ namespace Codefarts.ViewMessaging
 
             IView wpfView;
 
+            // try to use handlers first
+            foreach (var callback in this.handlerCallbacks)
+            {
+                wpfView = callback(name, args);
+                if (wpfView != null)
+                {
+                    this.OnViewCreated(wpfView);
+                    return wpfView;
+                }
+            }
+
             // attempt to create from cache first
             if (this.CreateViewFromCache(viewName, args, isDataTemplate, name, out wpfView))
             {
-                return this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
+                var result = this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
+                this.OnViewCreated(result);
+                return result;
             }
 
             // if not in cache scan for
             if (this.ScanDomainForView(viewName, args, isDataTemplate, name, useCache, out wpfView))
             {
-                return this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
+                var result = this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
+                this.OnViewCreated(result);
+                return result;
             }
 
             if (scanForAssemblies && this.SearchForViewAssemblies(viewName, args, isDataTemplate, name, useCache, out wpfView))
             {
-                return this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
+                var result = this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
+                this.OnViewCreated(result);
+                return result;
             }
 
             return null;
+        }
+
+        public void RegisterHandler(Func<string, ViewArguments, IView> callback)
+        {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            this.handlerCallbacks.Add(callback);
+        }
+
+        public IDictionary<string, IViewMessage> MessageHandlers
+        {
+            get
+            {
+                return this.messageHandlers;
+            }
+        }
+
+        public void SendMessage(string message, IView view, ViewArguments args)
+        {
+            this.MessageHandlers[message].SendMessage(view, args);
         }
 
         private IView TryToResolveViewModel(string viewModelName, bool scanForAssemblies, bool useCache, IView wpfView)
         {
             if (this.mVVMEnabled)
             {
-                this.vmResolver.ResolveViewModel(viewModelName, wpfView, scanForAssemblies, useCache);
+                this.vmResolver.ResolveViewModel(this, viewModelName, wpfView, scanForAssemblies, useCache);
             }
 
             return wpfView;
@@ -285,6 +342,22 @@ namespace Codefarts.ViewMessaging
                 }
 
                 var assembly = Assembly.LoadFile(asmFile);
+                if (isDataTemplate)
+                {
+                    var resourceNames = assembly.GetManifestResourceNames();
+                    var res = resourceNames.FirstOrDefault(x => x.EndsWith(name + "DataTemplate.xaml", StringComparison.OrdinalIgnoreCase));
+                    if (res != null)
+                    {
+                        using (var stream = assembly.GetManifestResourceStream(res))
+                        {
+                            var context = new ParserContext();
+                            //  context.XamlTypeMapper.AddMappingProcessingInstruction();
+                            var resource = (ResourceDictionary)System.Windows.Markup.XamlReader.Load(stream, context);
+                            Application.Current.Resources.MergedDictionaries.Add(resource);
+                        }
+                    }
+                }
+
                 if (this.GetViewType(viewName, args, assembly, isDataTemplate, name, cacheView, out wpfView))
                 {
                     return true;
@@ -300,6 +373,28 @@ namespace Codefarts.ViewMessaging
             if (asm == null)
             {
                 throw new ArgumentNullException(nameof(asm));
+            }
+
+            if (isDataTemplate)
+            {
+                var item = Application.Current.TryFindResource(viewName);
+                if (item != null)
+                {
+                    var element = item as DataTemplate;
+                    var newView = new WpfView(this, element, name, args == null ? null : new ViewArguments(args));
+                    this.viewReferences.Add(newView.Id, newView);
+                    // successfully created so add type to cache for faster access
+                    if (cacheView)
+                    {
+                        lock (previouslyCreatedViews)
+                        {
+                            previouslyCreatedViews[viewName] = item.GetType();
+                        }
+                    }
+
+                    wpfView = newView;
+                    return true;
+                }
             }
 
             var types = asm.GetTypes().AsParallel();
@@ -352,7 +447,9 @@ namespace Codefarts.ViewMessaging
             return false;
         }
 
-        /// <summary>Called when [property changed].</summary>
+        /// <summary>
+        /// Called when [property changed].
+        /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -360,6 +457,19 @@ namespace Codefarts.ViewMessaging
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        /// <summary>
+        /// Called after a view if successfully created.
+        /// </summary>
+        /// <param name="view">Reference to the view that was created.</param>
+        protected virtual void OnViewCreated(IView view)
+        {
+            var handler = this.ViewCreated;
+            if (handler != null)
+            {
+                handler(this, new ViewCreatedEventArgs(view));
             }
         }
 

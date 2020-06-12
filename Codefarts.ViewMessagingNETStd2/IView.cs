@@ -28,12 +28,6 @@
         object ViewReference
         {
             get;
-        }
-
-        /// <summary>
-        /// Sends a message to the view.
-        /// </summary>
-        /// <param name="args">The named arguments to be sent.</param>
-        void SendMessage(ViewArguments args);
+        }     
     }
 }

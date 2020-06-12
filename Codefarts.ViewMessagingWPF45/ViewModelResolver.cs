@@ -9,7 +9,6 @@ namespace Codefarts.ViewMessaging
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Windows;
 
     /// <summary>
     /// A view model resolver class.
@@ -24,7 +23,7 @@ namespace Codefarts.ViewMessaging
         /// </summary>
         public event ResolveEventHandler ViewModelTypeResolve;
 
-        internal void ResolveViewModel(string viewModelName, IView wpfView, bool scanForAssemblies, bool cacheViewModel)
+        internal void ResolveViewModel(IViewService viewService, string viewModelName, IView wpfView, bool scanForAssemblies, bool cacheViewModel)
         {
             if (viewModelName == null)
             {
@@ -42,20 +41,20 @@ namespace Codefarts.ViewMessaging
                 object viewModelRef;
                 if (this.CreateViewModelFromCache(viewModelName, wpfView, cacheViewModel, out viewModelRef))
                 {
-                    wpfView.SendMessage(GenericMessageArguments.SetModel(viewModelRef));
+                    viewService.SendMessage(GenericMessageConstants.SetModel, wpfView, GenericMessageArguments.SetModel(viewModelRef));
                     return;
                 }
 
                 // if not in cache scan for
                 if (this.ScanDomainForViewModel(viewModelName, cacheViewModel, out viewModelRef))
                 {
-                    wpfView.SendMessage(GenericMessageArguments.SetModel(viewModelRef));
+                    viewService.SendMessage(GenericMessageConstants.SetModel, wpfView, GenericMessageArguments.SetModel(viewModelRef));
                     return;
                 }
 
                 if (scanForAssemblies && this.SearchForViewModelAssemblies(viewModelName, cacheViewModel, out viewModelRef))
                 {
-                    wpfView.SendMessage(GenericMessageArguments.SetModel(viewModelRef));
+                    viewService.SendMessage(GenericMessageConstants.SetModel, wpfView, GenericMessageArguments.SetModel(viewModelRef));
                     return;
                 }
 
