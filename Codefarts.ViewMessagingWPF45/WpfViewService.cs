@@ -181,27 +181,39 @@ namespace Codefarts.ViewMessaging
             // attempt to create from cache first
             if (this.CreateViewFromCache(viewName, args, isDataTemplate, name, out wpfView))
             {
-                var result = this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
-                this.OnViewCreated(result);
-                return result;
+                this.SetViewModelAndReturn(args, viewModelName, scanForAssemblies, useCache, wpfView);
+                return wpfView;
             }
 
             // if not in cache scan for
             if (this.ScanDomainForView(viewName, args, isDataTemplate, name, useCache, out wpfView))
             {
-                var result = this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
-                this.OnViewCreated(result);
-                return result;
+                this.SetViewModelAndReturn(args, viewModelName, scanForAssemblies, useCache, wpfView);
+                return wpfView;
             }
 
             if (scanForAssemblies && this.SearchForViewAssemblies(viewName, args, isDataTemplate, name, useCache, out wpfView))
             {
-                var result = this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
-                this.OnViewCreated(result);
-                return result;
+                this.SetViewModelAndReturn(args, viewModelName, scanForAssemblies, useCache, wpfView);
+                return wpfView;
             }
 
             return null;
+        }
+
+        public void SetViewModelAndReturn(ViewArguments args, string viewModelName, bool scanForAssemblies, bool useCache, IView wpfView)
+        {
+            var model = args.Get<object>(GenericMessageConstants.SetModel, null);
+            if (model == null)
+            {
+                this.TryToResolveViewModel(viewModelName, scanForAssemblies, useCache, wpfView);
+                this.OnViewCreated(wpfView);
+            }
+            else
+            {
+                this.SendMessage(GenericMessageConstants.SetModel, wpfView, args);
+                this.OnViewCreated(wpfView);
+            }
         }
 
         public void RegisterHandler(Func<string, ViewArguments, IView> callback)
@@ -227,14 +239,12 @@ namespace Codefarts.ViewMessaging
             this.MessageHandlers[message].SendMessage(view, args);
         }
 
-        private IView TryToResolveViewModel(string viewModelName, bool scanForAssemblies, bool useCache, IView wpfView)
+        private void TryToResolveViewModel(string viewModelName, bool scanForAssemblies, bool useCache, IView wpfView)
         {
             if (this.mVVMEnabled)
             {
                 this.vmResolver.ResolveViewModel(this, viewModelName, wpfView, scanForAssemblies, useCache);
             }
-
-            return wpfView;
         }
 
         private bool ScanDomainForView(string viewName, ViewArguments args, bool isDataTemplate, string name, bool cacheView, out IView wpfView)
