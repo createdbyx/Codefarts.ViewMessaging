@@ -4,6 +4,8 @@
 // http://www.codefarts.com
 // </copyright>
 
+using System.Runtime.Loader;
+
 namespace Codefarts.ViewMessaging
 {
     using System;
@@ -351,7 +353,12 @@ namespace Codefarts.ViewMessaging
                     continue;
                 }
 
+#if NETCOREAPP3_1
+                var asmName = new AssemblyName(Path.GetFileNameWithoutExtension(asmFile));
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(asmName);
+#else
                 var assembly = Assembly.LoadFile(asmFile);
+#endif
                 if (isDataTemplate)
                 {
                     var resourceNames = assembly.GetManifestResourceNames();
@@ -361,7 +368,6 @@ namespace Codefarts.ViewMessaging
                         using (var stream = assembly.GetManifestResourceStream(res))
                         {
                             var context = new ParserContext();
-                            //  context.XamlTypeMapper.AddMappingProcessingInstruction();
                             var resource = (ResourceDictionary)System.Windows.Markup.XamlReader.Load(stream, context);
                             Application.Current.Resources.MergedDictionaries.Add(resource);
                         }
@@ -393,6 +399,7 @@ namespace Codefarts.ViewMessaging
                     var element = item as DataTemplate;
                     var newView = new WpfView(this, element, name, args == null ? null : new ViewArguments(args));
                     this.viewReferences.Add(newView.Id, newView);
+
                     // successfully created so add type to cache for faster access
                     if (cacheView)
                     {

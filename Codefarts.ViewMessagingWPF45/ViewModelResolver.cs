@@ -2,6 +2,8 @@
 // Copyright (c) Codefarts
 // </copyright>
 
+using System.Runtime.Loader;
+
 namespace Codefarts.ViewMessaging
 {
     using System;
@@ -146,7 +148,12 @@ namespace Codefarts.ViewMessaging
                     continue;
                 }
 
-                var assembly = Assembly.LoadFile(asmFile);
+#if NETCOREAPP3_1
+                var asmName = new AssemblyName(Path.GetFileNameWithoutExtension(asmFile));
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(asmName);
+#else
+                var assembly = Assembly.LoadFrom(asmFile);
+#endif
                 if (this.GetViewModelFromAssembly(viewName, assembly, cacheView, out viewModelRef))
                 {
                     return true;

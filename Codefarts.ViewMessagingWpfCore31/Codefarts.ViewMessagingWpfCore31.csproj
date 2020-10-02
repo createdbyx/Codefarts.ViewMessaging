@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>2020.9.8.3</AssemblyVersion>
-    <FileVersion>2020.9.8.3</FileVersion>
+    <AssemblyVersion>2020.9.15.3</AssemblyVersion>
+    <FileVersion>2020.9.15.3</FileVersion>
     <RootNamespace>Codefarts.ViewMessaging</RootNamespace>
   </PropertyGroup>
 
