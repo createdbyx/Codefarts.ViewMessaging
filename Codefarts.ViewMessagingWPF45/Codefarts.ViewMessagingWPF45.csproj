@@ -62,12 +62,6 @@
     <Analyzer Include="..\..\CombinedProjectsSolution\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Codefarts.ViewMessagingNET45\Codefarts.ViewMessagingNET45.csproj">
-      <Project>{EF13D915-12AE-4F3A-BF3A-7F20F862F54F}</Project>
-      <Name>Codefarts.ViewMessagingNET45</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Debug-PostBuild.xml" />
   </ItemGroup>
   <ItemGroup />
