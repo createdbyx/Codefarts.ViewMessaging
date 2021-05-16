@@ -1,10 +1,8 @@
-﻿// <copyright file="WpfViewService.cs" company="Codefarts">
+﻿// <copyright file="ConsoleViewService.cs" company="Codefarts">
 // Copyright (c) Codefarts
 // contact@codefarts.com
 // http://www.codefarts.com
 // </copyright>
-
-using System.Windows.Media;
 
 namespace Codefarts.ViewMessaging
 {
@@ -14,17 +12,12 @@ namespace Codefarts.ViewMessaging
     using System.IO;
     using System.Linq;
     using System.Reflection;
-#if NETCOREAPP3_1
-    using System.Runtime.Loader;
-#endif
-    using System.Windows;
-    using System.Windows.Markup;
-    using Codefarts.ViewMessaging.Wpf;
+    using Codefarts.ViewMessaging.Console;
 
     /// <summary>
     /// Provides an implementation of <see cref="IViewService"/> for windows presentation foundation.
     /// </summary>
-    public class WpfViewService : IViewService, INotifyPropertyChanged
+    public class ConsoleViewService : IViewService, INotifyPropertyChanged
     {
         /// <summary>
         /// The cache of previously created view types.
@@ -41,18 +34,18 @@ namespace Codefarts.ViewMessaging
         private List<Func<string, ViewArguments, IView>> handlerCallbacks;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WpfViewService"/> class.
+        /// Initializes a new instance of the <see cref="ConsoleViewService"/> class.
         /// </summary>
-        public WpfViewService()
+        public ConsoleViewService()
         {
             this.handlerCallbacks = new List<Func<string, ViewArguments, IView>>();
             this.vmResolver = new ViewModelResolver();
             this.vmResolver.ViewModelTypeResolve += (s, e) => this.OnViewModelTypeResolve(e);
-            this.messageHandlers[GenericMessageConstants.ShowDialog] = new ShowDialogMessage();
-            this.messageHandlers[GenericMessageConstants.Show] = new ShowWindowMessage();
+            // this.messageHandlers[GenericMessageConstants.ShowDialog] = new ShowDialogMessage();
+            this.messageHandlers[GenericMessageConstants.Show] = new ShowMessage();
             this.messageHandlers[GenericMessageConstants.SetModel] = new SetModelMessage();
-            this.messageHandlers[GenericMessageConstants.Update] = new UpdateMessage();
-            this.messageHandlers[GenericMessageConstants.Refresh] = new RefreshMessage();
+            // this.messageHandlers[GenericMessageConstants.Update] = new UpdateMessage();
+            // this.messageHandlers[GenericMessageConstants.Refresh] = new RefreshMessage();
         }
 
         /// <summary>
@@ -65,20 +58,14 @@ namespace Codefarts.ViewMessaging
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        /// Occurs every ime a view is created.
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler<ViewEventArgs> ViewCreated;
 
-        /// <summary>
-        /// Occurs every ime a view is deleted.
-        /// </summary>
-        public event EventHandler<ViewEventArgs> BeforeViewDeleted;
-
-        /// <summary>
-        /// Occurs every ime a view is deleted.
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler<ViewDeletedEventArgs> ViewDeleted;
+
+        /// <inheritdoc/>
+        public event EventHandler<ViewEventArgs> BeforeViewDeleted;
 
         /// <summary>
         /// Gets or sets the string that is appended to the view model name.
@@ -146,21 +133,7 @@ namespace Codefarts.ViewMessaging
         /// <inheritdoc/>
         public bool DeleteView(string id)
         {
-            IView viewRef;
-            bool result;
-            lock (this.viewReferences)
-            {
-                this.viewReferences.TryGetValue(id, out viewRef);
-                result = this.viewReferences.Remove(id);
-            }
-
-            if (result)
-            {
-                this.OnBeforeViewDeleted(viewRef);
-                this.OnViewDeleted(id);
-            }
-
-            return result;
+            return this.viewReferences.Remove(id);
         }
 
         /// <inheritdoc/>
@@ -177,43 +150,42 @@ namespace Codefarts.ViewMessaging
                 throw new ArgumentNullException(nameof(args));
             }
 
-            var isDataTemplate = args.Get<bool>("IsDataTemplate");
             var useCache = args.Get("UseCache", true);
             var scanForAssemblies = args.Get("ScanAssemblies", true);
             var viewName = name + this.appendedViewName;
             var viewModelName = name + this.appendedViewModelName;
 
-            IView wpfView;
+            IView consoleView;
 
             // try to use handlers first
             foreach (var callback in this.handlerCallbacks)
             {
-                wpfView = callback(name, args);
-                if (wpfView != null)
+                consoleView = callback(name, args);
+                if (consoleView != null)
                 {
-                    this.OnViewCreated(wpfView);
-                    return wpfView;
+                    this.OnViewCreated(consoleView);
+                    return consoleView;
                 }
             }
 
             // attempt to create from cache first
-            if (this.CreateViewFromCache(viewName, args, isDataTemplate, name, out wpfView))
+            if (this.CreateViewFromCache(viewName, args, name, out consoleView))
             {
-                this.SetViewModelAndReturn(args, viewModelName, scanForAssemblies, useCache, wpfView);
-                return wpfView;
+                this.SetViewModelAndReturn(args, viewModelName, scanForAssemblies, useCache, consoleView);
+                return consoleView;
             }
 
             // if not in cache scan for
-            if (this.ScanDomainForView(viewName, args, isDataTemplate, name, useCache, out wpfView))
+            if (this.ScanDomainForView(viewName, args, name, useCache, out consoleView))
             {
-                this.SetViewModelAndReturn(args, viewModelName, scanForAssemblies, useCache, wpfView);
-                return wpfView;
+                this.SetViewModelAndReturn(args, viewModelName, scanForAssemblies, useCache, consoleView);
+                return consoleView;
             }
 
-            if (scanForAssemblies && this.SearchForViewAssemblies(viewName, args, isDataTemplate, name, useCache, out wpfView))
+            if (scanForAssemblies && this.SearchForViewAssemblies(viewName, args, name, useCache, out consoleView))
             {
-                this.SetViewModelAndReturn(args, viewModelName, scanForAssemblies, useCache, wpfView);
-                return wpfView;
+                this.SetViewModelAndReturn(args, viewModelName, scanForAssemblies, useCache, consoleView);
+                return consoleView;
             }
 
             return null;
@@ -262,91 +234,91 @@ namespace Codefarts.ViewMessaging
             }
         }
 
-        private bool ScanDomainForView(string viewName, ViewArguments args, bool isDataTemplate, string name, bool cacheView, out IView wpfView)
+        private bool ScanDomainForView(string viewName, ViewArguments args, string name, bool cacheView, out IView wpfView)
         {
             wpfView = null;
-            if (isDataTemplate)
+            //if (isDataTemplate)
+            //{
+            //    var item = Application.Current.TryFindResource(viewName);
+            //    if (item != null)
+            //    {
+            //        var element = item as DataTemplate;
+            //        var newView = new ConsoleView(this, element, name, args == null ? null : new ViewArguments(args));
+            //        this.viewReferences.Add(newView.Id, newView);
+
+            //        // successfully created  so add type to cache for faster access
+            //        if (cacheView)
+            //        {
+            //            lock (previouslyCreatedViews)
+            //            {
+            //                previouslyCreatedViews[viewName] = element.DataType as Type;
+            //            }
+            //        }
+
+            //        return true;
+            //    }
+            //}
+            //else
+            //{
+            var filter = new Func<Assembly, bool>(x => !x.FullName.StartsWith("System") && !x.FullName.StartsWith("Microsoft"));
+
+            // search through all loaded assemblies
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var filteredAssemblies = assemblies.AsParallel().Where(filter);
+
+            foreach (var asm in filteredAssemblies)
             {
-                var item = Application.Current.TryFindResource(viewName);
-                if (item != null)
+                if (this.GetViewType(viewName, args, asm, name, cacheView, out wpfView))
                 {
-                    var element = item as DataTemplate;
-                    var newView = new WpfView(this, element, name, args == null ? null : new ViewArguments(args));
-                    this.viewReferences.Add(newView.Id, newView);
-
-                    // successfully created  so add type to cache for faster access
-                    if (cacheView)
-                    {
-                        lock (previouslyCreatedViews)
-                        {
-                            previouslyCreatedViews[viewName] = element.DataType as Type;
-                        }
-                    }
-
                     return true;
                 }
             }
-            else
-            {
-                var filter = new Func<Assembly, bool>(x => !x.FullName.StartsWith("System") && !x.FullName.StartsWith("Microsoft"));
-
-                // search through all loaded assemblies
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                var filteredAssemblies = assemblies.AsParallel().Where(filter);
-
-                foreach (var asm in filteredAssemblies)
-                {
-                    if (this.GetViewType(viewName, args, asm, isDataTemplate, name, cacheView, out wpfView))
-                    {
-                        return true;
-                    }
-                }
-            }
+            // }
 
             return false;
         }
 
-        private bool CreateViewFromCache(string viewName, ViewArguments args, bool isDataTemplate, string dataTemplateName, out IView wpfView)
+        private bool CreateViewFromCache(string viewName, ViewArguments args, string dataTemplateName, out IView wpfView)
         {
             wpfView = null;
 
             if (previouslyCreatedViews.ContainsKey(viewName))
             {
                 var firstView = previouslyCreatedViews[viewName];
-                if (isDataTemplate)
+                //if (isDataTemplate)
+                //{
+                //    var item = firstView != null ? Application.Current.TryFindResource(viewName) : null;
+                //    if (item != null)
+                //    {
+                //        var element = item as DataTemplate;
+                //        var newView = new ConsoleView(this, element, dataTemplateName, args == null ? null : new ViewArguments(args));
+                //        this.viewReferences.Add(newView.Id, newView);
+                //        {
+                //            wpfView = newView;
+                //            return true;
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                var viewRef = firstView != null ? firstView.Assembly.CreateInstance(firstView.FullName) : null;
+                if (viewRef != null)
                 {
-                    var item = firstView != null ? Application.Current.TryFindResource(viewName) : null;
-                    if (item != null)
+                    var consoleView = viewRef as IConsoleView;
+                    var newView = new ConsoleView(this, consoleView, dataTemplateName, args == null ? null : new ViewArguments(args));
+                    this.viewReferences.Add(newView.Id, newView);
                     {
-                        var element = item as DataTemplate;
-                        var newView = new WpfView(this, element, dataTemplateName, args == null ? null : new ViewArguments(args));
-                        this.viewReferences.Add(newView.Id, newView);
-                        {
-                            wpfView = newView;
-                            return true;
-                        }
+                        wpfView = newView;
+                        return true;
                     }
                 }
-                else
-                {
-                    var item = firstView != null ? firstView.Assembly.CreateInstance(firstView.FullName) : null;
-                    if (item != null)
-                    {
-                        var element = item as FrameworkElement;
-                        var newView = new WpfView(this, element, dataTemplateName, args == null ? null : new ViewArguments(args));
-                        this.viewReferences.Add(newView.Id, newView);
-                        {
-                            wpfView = newView;
-                            return true;
-                        }
-                    }
-                }
+                //}
             }
 
             return false;
         }
 
-        private bool SearchForViewAssemblies(string viewName, ViewArguments args, bool isDataTemplate, string name, bool cacheView, out IView wpfView)
+        private bool SearchForViewAssemblies(string viewName, ViewArguments args, string name, bool cacheView, out IView wpfView)
         {
             // ====== If we have made it here the view may be located in a currently unloaded assembly located in the app path
 
@@ -372,22 +344,22 @@ namespace Codefarts.ViewMessaging
 #else
                 var assembly = Assembly.LoadFile(asmFile);
 #endif
-                if (isDataTemplate)
-                {
-                    var resourceNames = assembly.GetManifestResourceNames();
-                    var res = resourceNames.FirstOrDefault(x => x.EndsWith(name + "DataTemplate.xaml", StringComparison.OrdinalIgnoreCase));
-                    if (res != null)
-                    {
-                        using (var stream = assembly.GetManifestResourceStream(res))
-                        {
-                            var context = new ParserContext();
-                            var resource = (ResourceDictionary)System.Windows.Markup.XamlReader.Load(stream, context);
-                            Application.Current.Resources.MergedDictionaries.Add(resource);
-                        }
-                    }
-                }
+                //if (isDataTemplate)
+                //{
+                //    var resourceNames = assembly.GetManifestResourceNames();
+                //    var res = resourceNames.FirstOrDefault(x => x.EndsWith(name + "DataTemplate.xaml", StringComparison.OrdinalIgnoreCase));
+                //    if (res != null)
+                //    {
+                //        using (var stream = assembly.GetManifestResourceStream(res))
+                //        {
+                //            var context = new ParserContext();
+                //            var resource = (ResourceDictionary)System.Windows.Markup.XamlReader.Load(stream, context);
+                //            Application.Current.Resources.MergedDictionaries.Add(resource);
+                //        }
+                //    }
+                //}
 
-                if (this.GetViewType(viewName, args, assembly, isDataTemplate, name, cacheView, out wpfView))
+                if (this.GetViewType(viewName, args, assembly, name, cacheView, out wpfView))
                 {
                     return true;
                 }
@@ -397,49 +369,48 @@ namespace Codefarts.ViewMessaging
             return false;
         }
 
-        private bool GetViewType(string viewName, ViewArguments args, Assembly asm, bool isDataTemplate, string name, bool cacheView,
-            out IView wpfView)
+        private bool GetViewType(string viewName, ViewArguments args, Assembly asm, string name, bool cacheView, out IView wpfView)
         {
             if (asm == null)
             {
                 throw new ArgumentNullException(nameof(asm));
             }
 
-            if (isDataTemplate)
-            {
-                var item = Application.Current.TryFindResource(viewName);
-                if (item != null)
-                {
-                    var element = item as DataTemplate;
-                    var newView = new WpfView(this, element, name, args == null ? null : new ViewArguments(args));
-                    this.viewReferences.Add(newView.Id, newView);
+            //if (isDataTemplate)
+            //{
+            //    var item = Application.Current.TryFindResource(viewName);
+            //    if (item != null)
+            //    {
+            //        var element = item as DataTemplate;
+            //        var newView = new ConsoleView(this, element, name, args == null ? null : new ViewArguments(args));
+            //        this.viewReferences.Add(newView.Id, newView);
 
-                    // successfully created so add type to cache for faster access
-                    if (cacheView)
-                    {
-                        lock (previouslyCreatedViews)
-                        {
-                            previouslyCreatedViews[viewName] = item.GetType();
-                        }
-                    }
+            //        // successfully created so add type to cache for faster access
+            //        if (cacheView)
+            //        {
+            //            lock (previouslyCreatedViews)
+            //            {
+            //                previouslyCreatedViews[viewName] = item.GetType();
+            //            }
+            //        }
 
-                    wpfView = newView;
-                    return true;
-                }
-            }
+            //        wpfView = newView;
+            //        return true;
+            //    }
+            //}
 
             var types = asm.GetTypes().AsParallel();
-            var views = types.Where(x => this.ViewTypeAndNameMatch(x, viewName, isDataTemplate));
+            var views = types.Where(x => this.ViewTypeAndNameMatch(x, viewName));
 
             try
             {
                 var firstView = views.FirstOrDefault();
-                var item = firstView != null ? asm.CreateInstance(firstView.FullName) : null;
+                var viewRef = firstView != null ? asm.CreateInstance(firstView.FullName) : null;
 
-                if (item != null)
+                if (viewRef != null)
                 {
-                    var element = item as FrameworkElement;
-                    var newView = new WpfView(this, element, name, args == null ? null : new ViewArguments(args));
+                    var consoleView = viewRef as IConsoleView;
+                    var newView = new ConsoleView(this, consoleView, name, args == null ? null : new ViewArguments(args));
                     this.viewReferences.Add(newView.Id, newView);
 
                     // successfully created so add type to cache for faster access
@@ -463,16 +434,16 @@ namespace Codefarts.ViewMessaging
             return false;
         }
 
-        private bool ViewTypeAndNameMatch(Type x, string name, bool isDataTemplate)
+        private bool ViewTypeAndNameMatch(Type x, string name)
         {
             if (x.Name.Equals(name))
             {
-                if (isDataTemplate)
-                {
-                    return x.IsSubclassOf(typeof(DataTemplate));
-                }
+                //if (isDataTemplate)
+                //{
+                //    return x.IsSubclassOf(typeof(DataTemplate));
+                //}
 
-                return x.IsSubclassOf(typeof(FrameworkElement));
+                return x.IsAssignableTo(typeof(IConsoleView));
             }
 
             return false;
@@ -501,32 +472,6 @@ namespace Codefarts.ViewMessaging
             if (handler != null)
             {
                 handler(this, new ViewEventArgs(view));
-            }
-        }
-
-        /// <summary>
-        /// Called before a view is deleted.
-        /// </summary>
-        /// <param name="view">Reference to the view that is to be.</param>
-        protected virtual void OnBeforeViewDeleted(IView view)
-        {
-            var handler = this.BeforeViewDeleted;
-            if (handler != null)
-            {
-                handler(this, new ViewEventArgs(view));
-            }
-        }
-
-        /// <summary>
-        /// Called after a view if successfully deleted.
-        /// </summary>
-        /// <param name="viewId">Reference to the view that was deleted.</param>
-        protected virtual void OnViewDeleted(string viewId)
-        {
-            var handler = this.ViewDeleted;
-            if (handler != null)
-            {
-                handler(this, new ViewDeletedEventArgs(viewId));
             }
         }
 

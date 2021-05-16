@@ -1,4 +1,4 @@
-﻿// <copyright file="ViewCreatedEventArgs.cs" company="Codefarts">
+﻿// <copyright file="ViewEventArgs.cs" company="Codefarts">
 // Copyright (c) Codefarts
 // contact@codefarts.com
 // http://www.codefarts.com
@@ -8,14 +8,14 @@ namespace Codefarts.ViewMessaging
 {
     using System;
 
-    public class ViewCreatedEventArgs : EventArgs
+    public class ViewEventArgs : EventArgs
     {
         public IView View
         {
             get; private set;
         }
 
-        public ViewCreatedEventArgs(IView view)
+        public ViewEventArgs(IView view)
         {
             this.View = view;
         }

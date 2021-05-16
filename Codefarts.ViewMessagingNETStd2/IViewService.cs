@@ -9,6 +9,10 @@ namespace Codefarts.ViewMessaging
     using System;
     using System.Collections.Generic;
 
+#if NET20 // .NET 2.0 compatibility
+    public delegate TResult Func<in T1, in T2, out TResult>(T1 arg1, T2 arg2);
+#endif
+
     /// <summary>
     /// Provides a interface for view services.
     /// </summary>
@@ -17,15 +21,22 @@ namespace Codefarts.ViewMessaging
         /// <summary>
         /// Raised after a view is successfully created.
         /// </summary>
-        event EventHandler<ViewCreatedEventArgs> ViewCreated;
+        event EventHandler<ViewEventArgs> ViewCreated;
+
+        /// <summary>
+        /// Raised after a view is successfully deleted.
+        /// </summary>
+        event EventHandler<ViewDeletedEventArgs> ViewDeleted;
+
+        /// <summary>
+        /// Raised before a view is deleted.
+        /// </summary>
+        event EventHandler<ViewEventArgs> BeforeViewDeleted;
 
         /// <summary>
         /// Gets the views that have been created.
         /// </summary>
-        IEnumerable<IView> Views
-        {
-            get;
-        }
+        IEnumerable<IView> Views { get; }
 
         /// <summary>
         /// Gets the view using a view id.
@@ -69,10 +80,7 @@ namespace Codefarts.ViewMessaging
         /// Gets the message handlers.
         /// </summary>
         /// <remarks>a message handler is a platform specific implementation of the <see cref="IViewMessage"/> interface that is designed to handle messages sent to a <see cref="IView"/> implementation.</remarks>
-        IDictionary<string, IViewMessage> MessageHandlers
-        {
-            get;
-        }
+        IDictionary<string, IViewMessage> MessageHandlers { get; }
 
         /// <summary>
         /// Sends a the message to the view.

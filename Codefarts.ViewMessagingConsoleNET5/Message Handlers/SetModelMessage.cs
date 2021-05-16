@@ -4,10 +4,9 @@
 // http://www.codefarts.com
 // </copyright>
 
-namespace Codefarts.ViewMessaging.Wpf
+namespace Codefarts.ViewMessaging.Console
 {
     using System;
-    using System.Windows;
 
     public class SetModelMessage : IViewMessage
     {
@@ -32,20 +31,14 @@ namespace Codefarts.ViewMessaging.Wpf
                 throw new ArgumentNullException($"Missing '{GenericMessageConstants.SetModel}' argument.");
             }
 
-            var ctrl = view.ViewReference as FrameworkElement;
+            var ctrl = view.ViewReference as IConsoleView;
             if (ctrl != null)
             {
                 ctrl.DataContext = model;
                 return;
             }
 
-            throw new InvalidCastException("ViewReference is not of type FrameworkElement.");
-            //var template = default(object); // this.templateReference;
-            //if (template != null)
-            //{
-            //    // TODO: Not yet implemented and it may not need to be
-            //    //throw new NotSupportedException("Setting a model on a DataTemplate is not yet supported. (And may never will be #SadFace)");
-            //}
+            throw new InvalidCastException("ViewReference is not of type IConsoleView.");
         }
     }
 }

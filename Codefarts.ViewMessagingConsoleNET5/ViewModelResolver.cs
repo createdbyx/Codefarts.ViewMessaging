@@ -11,14 +11,11 @@ namespace Codefarts.ViewMessaging
     using System.IO;
     using System.Linq;
     using System.Reflection;
-#if NETCOREAPP3_1
-    using System.Runtime.Loader;
-#endif
 
     /// <summary>
     /// A view model resolver class.
     /// </summary>
-    /// <remarks>Used by <see cref="WpfViewService"/> for resolving view model classes.</remarks>
+    /// <remarks>Used by <see cref="ConsoleViewService"/> for resolving view model classes.</remarks>
     internal class ViewModelResolver
     {
         private static readonly Dictionary<string, Type> previouslyCreatedViewModels = new Dictionary<string, Type>();

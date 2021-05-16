@@ -1,4 +1,10 @@
-﻿namespace Codefarts.ViewMessaging
+﻿// <copyright file="ResolveEventHandler.cs" company="Codefarts">
+// Copyright (c) Codefarts
+// contact@codefarts.com
+// http://www.codefarts.com
+// </copyright>
+
+namespace Codefarts.ViewMessaging
 {
     using System;
 

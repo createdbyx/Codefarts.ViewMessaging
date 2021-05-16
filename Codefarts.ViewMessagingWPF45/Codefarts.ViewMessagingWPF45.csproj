@@ -43,8 +43,8 @@
     <Compile Include="Message Handlers\SetModelMessage.cs" />
     <Compile Include="Message Handlers\ShowDialogMessage.cs" />
     <Compile Include="Message Handlers\UpdateMessage.cs" />
-    <Compile Include="ResolveEventHandler.cs" />
     <Compile Include="Message Handlers\ShowWindowMessage.cs" />
+    <Compile Include="ResolveEventArgs.cs" />
     <Compile Include="ViewModelResolver.cs" />
     <Compile Include="WpfDataTemplate.cs" />
     <Compile Include="WpfView.cs" />
@@ -64,7 +64,12 @@
   <ItemGroup>
     <None Include="Debug-PostBuild.xml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Codefarts.ViewMessagingNET45\Codefarts.ViewMessagingNET45.csproj">
+      <Project>{EF13D915-12AE-4F3A-BF3A-7F20F862F54F}</Project>
+      <Name>Codefarts.ViewMessagingNET45</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>powershell.exe -ExecutionPolicy Unrestricted -noprofile -nologo -noninteractive -Command .'P:\PowerShell\post-build.ps1' -vs_OutDir:'$(OutDir)' -vs_ConfigurationName:'$(ConfigurationName)' -vs_ProjectName:'$(ProjectName)' -vs_TargetName:'$(TargetName)' -vs_TargetPath:'$(TargetPath)' -vs_ProjectPath:'$(ProjectPath)' -vs_ProjectFileName:'$(ProjectFileName)'	-vs_TargetExt:'$(TargetExt)' -vs_TargetFileName:'$(TargetFileName)' -vs_DevEnvDir:'$(DevEnvDir)' -vs_TargetDir:'$(TargetDir)' -vs_ProjectDir:'$(ProjectDir)' -vs_SolutionFileName:'$(SolutionFileName)' -vs_SolutionPath:'$(SolutionPath)' -vs_SolutionDir:'$(SolutionDir)' -vs_SolutionName:'$(SolutionName)' -vs_PlatformName:'$(PlatformName)' -vs_ProjectExt:'$(ProjectExt)' -vs_SolutionExt:'$(SolutionExt)'</PostBuildEvent>

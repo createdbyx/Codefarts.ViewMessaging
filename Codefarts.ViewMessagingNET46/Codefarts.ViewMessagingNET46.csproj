@@ -72,6 +72,12 @@
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewArguments.cs">
       <Link>ViewArguments.cs</Link>
     </Compile>
+    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewEventArgs.cs">
+      <Link>ViewEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewDeletedEventArgs.cs">
+      <Link>ViewDeletedEventArgs.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

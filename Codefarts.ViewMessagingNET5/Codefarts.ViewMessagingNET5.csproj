@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>2021.3.24.0</AssemblyVersion>
-    <FileVersion>2021.3.24.0</FileVersion>
+    <AssemblyVersion>2021.4.1.2</AssemblyVersion>
+    <FileVersion>2021.4.1.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +16,10 @@
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ReadOnlyDictionary.cs" Link="ReadOnlyDictionary.cs" />
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewArguments NET20.cs" Link="ViewArguments NET20.cs" />
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewArguments.cs" Link="ViewArguments.cs" />
-    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewCreatedEventArgs.cs" Link="ViewCreatedEventArgs.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewEventArgs.cs" Link="ViewEventArgs.cs" />
+    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewDeletedEventArgs.cs">
+      <Link>ViewDeletedEventArgs.cs</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
