@@ -51,9 +51,6 @@
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ReadOnlyDictionary.cs">
       <Link>ReadOnlyDictionary.cs</Link>
     </Compile>
-    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewArguments NET20.cs">
-      <Link>ViewArguments NET20.cs</Link>
-    </Compile>
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewArguments.cs">
       <Link>ViewArguments.cs</Link>
     </Compile>
@@ -70,6 +67,11 @@
       <Link>stylecop.json</Link>
     </AdditionalFiles>
     <None Include="Debug-PostBuild.xml" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -14,7 +14,6 @@
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\IViewMessage.cs" Link="IViewMessage.cs" />
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\IViewService.cs" Link="IViewService.cs" />
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ReadOnlyDictionary.cs" Link="ReadOnlyDictionary.cs" />
-    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewArguments NET20.cs" Link="ViewArguments NET20.cs" />
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewArguments.cs" Link="ViewArguments.cs" />
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewEventArgs.cs" Link="ViewEventArgs.cs" />
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewDeletedEventArgs.cs">

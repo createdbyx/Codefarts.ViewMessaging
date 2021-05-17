@@ -1,8 +1,7 @@
-// <copyright>
-//   Copyright (c) 2012 Codefarts
-//   All rights reserved.
-//   contact@codefarts.com
-//   http://www.codefarts.com
+// <copyright file="ReadOnlyDictionary.cs" company="Codefarts">
+// Copyright (c) Codefarts
+// contact@codefarts.com
+// http://www.codefarts.com
 // </copyright>
 
 #if NET20
@@ -22,14 +21,8 @@ namespace System.ViewMessaging
     /// </typeparam>
     public class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
-        #region Fields
-
         /// <summary>The _dictionary.</summary>
         private readonly IDictionary<TKey, TValue> dictionary;
-
-        #endregion
-
-        #region Constructors and Destructors
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ReadOnlyDictionary{TKey,TValue}" /> class. Initializes a new instance
@@ -51,10 +44,6 @@ namespace System.ViewMessaging
         {
             this.dictionary = dictionary;
         }
-
-        #endregion
-
-        #region Public Properties
 
         /// <summary>Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.</summary>
         /// <returns>The number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.</returns>
@@ -108,10 +97,6 @@ namespace System.ViewMessaging
             }
         }
 
-        #endregion
-
-        #region Public Indexers
-
         /// <summary>
         /// Gets or sets the element with the specified key.
         /// </summary>
@@ -122,7 +107,7 @@ namespace System.ViewMessaging
         /// The the element with the specified key.
         /// </returns>
         /// <exception cref="System.NotSupportedException">
-        /// This dictionary is read-only
+        /// This dictionary is read-only.
         /// </exception>
         public TValue this[TKey key]
         {
@@ -136,10 +121,6 @@ namespace System.ViewMessaging
                 throw new NotSupportedException("This dictionary is read-only");
             }
         }
-
-        #endregion
-
-        #region Public Methods and Operators
 
         /// <summary>
         /// Adds an element with the provided key and value to the <see cref="T:System.Collections.Generic.IDictionary`2"/>.
@@ -165,7 +146,7 @@ namespace System.ViewMessaging
         /// The object to add to the <see cref="T:System.Collections.Generic.ICollection`1"/>.
         /// </param>
         /// <exception cref="System.NotSupportedException">
-        /// This dictionary is read-only
+        /// This dictionary is read-only.
         /// </exception>
         public void Add(KeyValuePair<TKey, TValue> item)
         {
@@ -173,7 +154,7 @@ namespace System.ViewMessaging
         }
 
         /// <summary>Removes all items from the <see cref="T:System.Collections.Generic.ICollection`1" />.</summary>
-        /// <exception cref="System.NotSupportedException">This dictionary is read-only</exception>
+        /// <exception cref="System.NotSupportedException">This dictionary is read-only.</exception>
         public void Clear()
         {
             throw new NotSupportedException("This dictionary is read-only");
@@ -245,7 +226,7 @@ namespace System.ViewMessaging
         ///     <paramref name="key"/> was not found in the original <see cref="T:System.Collections.Generic.IDictionary`2"/>.
         /// </returns>
         /// <exception cref="System.NotSupportedException">
-        /// This dictionary is read-only
+        /// This dictionary is read-only.
         /// </exception>
         public bool Remove(TKey key)
         {
@@ -265,7 +246,7 @@ namespace System.ViewMessaging
         ///     <paramref name="item"/> is not found in the original <see cref="T:System.Collections.Generic.ICollection`1"/>.
         /// </returns>
         /// <exception cref="System.NotSupportedException">
-        /// This dictionary is read-only
+        /// This dictionary is read-only.
         /// </exception>
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
@@ -291,18 +272,12 @@ namespace System.ViewMessaging
             return this.dictionary.TryGetValue(key, out value);
         }
 
-        #endregion
-
-        #region Explicit Interface Methods
-
         /// <summary>Returns an enumerator that iterates through a collection.</summary>
         /// <returns>An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return (this.dictionary as IEnumerable).GetEnumerator();
         }
-
-        #endregion
     }
 }
 #endif

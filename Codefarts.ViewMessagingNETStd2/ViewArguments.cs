@@ -1,23 +1,28 @@
-﻿namespace Codefarts.ViewMessaging
+﻿// <copyright file="ViewArguments.cs" company="Codefarts">
+// Copyright (c) Codefarts
+// contact@codefarts.com
+// http://www.codefarts.com
+// </copyright>
+
+namespace Codefarts.ViewMessaging
 {
 #if NET20
     using System.ViewMessaging;
 #else
     using System.Collections.ObjectModel;
-#endif 
+#endif
     using System.Collections.Generic;
 
     /// <summary>
     /// Provides a readonly collection of named arguments.
     /// </summary>
-    public partial class ViewArguments : ReadOnlyDictionary<string, object>
+    public class ViewArguments : ReadOnlyDictionary<string, object>
     {
         /// <summary>Initializes a new instance of the <see cref="ViewArguments" /> class.</summary>
         public ViewArguments()
             : base(new Dictionary<string, object>())
         {
         }
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ViewArguments"/> class.

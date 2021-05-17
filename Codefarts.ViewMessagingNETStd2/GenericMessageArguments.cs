@@ -48,6 +48,7 @@ namespace Codefarts.ViewMessaging
         /// <summary>
         /// Builds simple show dialog arguments.
         /// </summary>
+        /// <param name="viewId">A view id that represents the parent dialog.</param>
         /// <returns>A reference to a new <see cref="ViewArguments"/> type.</returns>
         public static ViewArguments ShowDialog(string viewId)
         {

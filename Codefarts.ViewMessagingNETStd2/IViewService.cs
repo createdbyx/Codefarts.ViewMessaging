@@ -10,6 +10,12 @@ namespace Codefarts.ViewMessaging
     using System.Collections.Generic;
 
 #if NET20 // .NET 2.0 compatibility
+    /// <summary>
+    /// Provides a Func callback delegate for older .NET 2.0 compatibility.
+    /// </summary>
+    /// <typeparam name="T1"></typeparam>
+    /// <typeparam name="T2"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
     public delegate TResult Func<in T1, in T2, out TResult>(T1 arg1, T2 arg2);
 #endif
 
@@ -37,6 +43,12 @@ namespace Codefarts.ViewMessaging
         /// Gets the views that have been created.
         /// </summary>
         IEnumerable<IView> Views { get; }
+
+        /// <summary>
+        /// Gets the message handlers.
+        /// </summary>
+        /// <remarks>a message handler is a platform specific implementation of the <see cref="IViewMessage"/> interface that is designed to handle messages sent to a <see cref="IView"/> implementation.</remarks>
+        IDictionary<string, IViewMessage> MessageHandlers { get; }
 
         /// <summary>
         /// Gets the view using a view id.
@@ -75,12 +87,6 @@ namespace Codefarts.ViewMessaging
         /// a view is created. If no view was created fallback to internal view creation. This gives consumers ability to specify special
         /// case view creation for whatever platform they running on.</remarks>
         void RegisterHandler(Func<string, ViewArguments, IView> callback);
-
-        /// <summary>
-        /// Gets the message handlers.
-        /// </summary>
-        /// <remarks>a message handler is a platform specific implementation of the <see cref="IViewMessage"/> interface that is designed to handle messages sent to a <see cref="IView"/> implementation.</remarks>
-        IDictionary<string, IViewMessage> MessageHandlers { get; }
 
         /// <summary>
         /// Sends a the message to the view.

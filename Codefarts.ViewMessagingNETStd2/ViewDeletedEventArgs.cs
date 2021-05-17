@@ -8,16 +8,23 @@ namespace Codefarts.ViewMessaging
 {
     using System;
 
+    /// <summary>
+    /// Provides events args for the <see cref="IViewService.ViewDeleted"/> event.
+    /// </summary>
     public class ViewDeletedEventArgs : EventArgs
     {
-        public string ViewId
-        {
-            get; private set;
-        }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ViewDeletedEventArgs"/> class.
+        /// </summary>
+        /// <param name="id">The id of the view that will be deleted.</param>
         public ViewDeletedEventArgs(string id)
         {
             this.ViewId = id;
         }
+
+        /// <summary>
+        /// Gets the id of the view that was deleted.
+        /// </summary>
+        public string ViewId { get; }
     }
 }

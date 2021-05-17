@@ -7,6 +7,8 @@
 #if !NET20
 namespace Codefarts.ViewMessaging
 {
+    using System;
+
     /// <summary>
     /// Provides extension methods for the <see cref="ViewArguments"/> type.
     /// </summary>
@@ -19,9 +21,15 @@ namespace Codefarts.ViewMessaging
         /// <param name="key">The name of the argument to be retrieved.</param>
         /// <param name="fallbackValue">The fallback value to return is there was a problem retrieving the argument.</param>
         /// <typeparam name="T">The type to convert the argument value into.</typeparam>
+        /// <exception cref="ArgumentNullException">Thrown if the <paramref name="args"/> parameter is null.</exception>
         /// <returns>Returns the converted argument value; otherwise if something went wrong returns the fallback value.</returns>
         public static T Get<T>(this ViewArguments args, string key, T fallbackValue)
         {
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
             object value;
             if (args.TryGetValue(key, out value))
             {
