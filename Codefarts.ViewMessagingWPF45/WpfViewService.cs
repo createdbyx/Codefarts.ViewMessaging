@@ -510,6 +510,11 @@ namespace Codefarts.ViewMessaging
         /// <param name="view">Reference to the view that is to be.</param>
         protected virtual void OnBeforeViewDeleted(IView view)
         {
+            if (view == null)
+            {
+                throw new ArgumentNullException(nameof(view));
+            }
+
             var handler = this.BeforeViewDeleted;
             if (handler != null)
             {

@@ -23,15 +23,27 @@
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfDataTemplate.cs" Link="WpfDataTemplate.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfView.cs" Link="WpfView.cs" />
     <Compile Include="..\Codefarts.ViewMessagingWPF45\WpfViewService.cs" Link="WpfViewService.cs" />
+    <Compile Remove="Exceptions\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Exceptions\" />
     <Folder Include="Message Handlers\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Codefarts.ViewMessagingNET5\Codefarts.ViewMessagingNET5.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Exceptions\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Exceptions\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Exceptions\**" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

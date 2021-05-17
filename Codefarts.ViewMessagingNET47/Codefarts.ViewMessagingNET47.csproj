@@ -75,6 +75,9 @@
     <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewDeletedEventArgs.cs">
       <Link>ViewDeletedEventArgs.cs</Link>
     </Compile>
+    <Compile Include="..\Codefarts.ViewMessagingNETStd2\ViewModelNotResolvedException.cs">
+      <Link>ViewModelNotResolvedException.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -38,7 +38,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Exceptions\ViewModelNotResolvedException.cs" />
     <Compile Include="Message Handlers\RefreshMessage.cs" />
     <Compile Include="Message Handlers\SetModelMessage.cs" />
     <Compile Include="Message Handlers\ShowDialogMessage.cs" />
