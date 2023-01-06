@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="..\..\stylecop.json">
+        <Link>stylecop.json</Link>
+      </AdditionalFiles>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Codefarts.ViewMessaging.Wpf" Version="2022.11.24" />
+      <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Codefarts.ViewMessaging\Codefarts.ViewMessaging.csproj" />
+    </ItemGroup>
+
+</Project>

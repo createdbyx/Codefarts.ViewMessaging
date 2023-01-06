@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <RollForward>Major</RollForward>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <TieredCompilation>false</TieredCompilation>
+        <UseWindowsForms>true</UseWindowsForms>
+    </PropertyGroup>
+    <PropertyGroup>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>Icon.ico</ApplicationIcon>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Codefarts.AppCore" Version="2022.11.24" />
+        <PackageReference Include="Codefarts.AppCore.SettingProviders.Xml" Version="2022.11.25" />
+        <PackageReference Include="Codefarts.DependenceyInjection" Version="2022.4.22.22" />
+        <PackageReference Include="Codefarts.IoC" Version="2022.11.26" />
+        <PackageReference Include="Codefarts.MonoGameScreenManager" Version="1.0.0" />
+        <PackageReference Include="Codefarts.ViewMessaging" Version="2022.11.24" />
+        <PackageReference Include="Codefarts.ViewMessaging.MonoGame.GameScreens" Version="1.0.0" />
+        <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
+        <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
+    </ItemGroup>
+    <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
+        <Message Text="Restoring dotnet tools" Importance="High" />
+        <Exec Command="dotnet tool restore" />
+    </Target>
+</Project>

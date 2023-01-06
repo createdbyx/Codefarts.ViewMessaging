@@ -1,5 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<inline>
-    <deploy path="P:\Codefarts Assemblies\$(ProjectName)\Latest\$(ConfigurationName)\" clean="true" />
-    <!--<deploy path="P:\Codefarts Assemblies\$(ProjectName)\$(ProjectVersion)\$(ConfigurationName)\" clean="true" />-->
-</inline>

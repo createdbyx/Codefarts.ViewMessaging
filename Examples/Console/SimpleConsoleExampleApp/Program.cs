@@ -14,6 +14,7 @@ namespace SimpleConsoleExampleApp
         static void Main(string[] args)
         {
             var viewService = new ConsoleViewService() { MvvmEnabled = true };
+            AppDomain.CurrentDomain.SetData("ViewService", viewService);
             var app = new ConsoleApp(viewService);
             app.Run();
         }
@@ -37,7 +38,6 @@ namespace SimpleConsoleExampleApp
                 this.isRunning = true;
                 while (this.isRunning)
                 {
-
                 }
             }
         }
