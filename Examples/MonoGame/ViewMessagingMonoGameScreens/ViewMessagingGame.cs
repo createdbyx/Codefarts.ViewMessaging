@@ -1,8 +1,12 @@
-﻿using System;
-using Codefarts.AppCore.Interfaces;
+﻿// <copyright file="ViewMessagingGame.cs" company="Codefarts">
+// Copyright (c) Codefarts
+// contact@codefarts.com
+// http://www.codefarts.com
+// </copyright>
+
+using System;
 using Codefarts.DependencyInjection;
 using Codefarts.ViewMessaging;
-using Codefarts.ViewMessaging.MonoGame.GameScreens;
 
 namespace ViewMessagingMonoGameScreens;
 
