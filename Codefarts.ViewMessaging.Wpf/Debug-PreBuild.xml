@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<inline>
-    <updateversion ProjectFileName="$(ProjectPath)"/>
-</inline>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<build>
+  <updateversion ProjectFileName="$(ProjectPath)" />
+</build>

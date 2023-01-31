@@ -21,6 +21,14 @@
         <PackageReference Include="Codefarts.ViewMessaging.MonoGame.GameScreens" Version="1.0.0" />
         <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
         <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Remove="C:\Users\Dean\.nuget\packages\codefarts.dependenceyinjection\2022.4.22.22\contentFiles\any\net6.0-windows7.0\stylecop.json" />
+      <AdditionalFiles Include="C:\Users\Dean\.nuget\packages\codefarts.dependenceyinjection\2022.4.22.22\contentFiles\any\net6.0-windows7.0\stylecop.json" />
     </ItemGroup>
     <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
         <Message Text="Restoring dotnet tools" Importance="High" />

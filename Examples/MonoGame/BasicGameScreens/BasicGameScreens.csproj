@@ -14,6 +14,7 @@
         <Company>Codefarts</Company>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
         <FileVersion>1.0.0.0</FileVersion>
+        <UserSecretsId>5888f8bf-b21b-4c9c-9633-850b506f4f0b</UserSecretsId>
     </PropertyGroup>
     <PropertyGroup>
         <ApplicationManifest>app.manifest</ApplicationManifest>
