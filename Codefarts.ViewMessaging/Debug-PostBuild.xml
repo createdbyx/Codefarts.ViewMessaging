@@ -5,4 +5,7 @@
   <copydir source="$(ProjectDir)$(OutDir)..\" destination="P:\Codefarts Nuget Packages\" clean="false" allconditions="true" subfolders="false">
     <condition value=".nupkg" operator="endswith" ignorecase="true" />
   </copydir>
+
+  <updateversion ProjectFileName="$(ProjectPath)" retry="true" retrycount="50"/>
+
 </build>

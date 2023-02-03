@@ -17,7 +17,9 @@
     <RepositoryUrl>https://github.com/createdbyx/Codefarts.ViewMessaging.git</RepositoryUrl>
     <RepositoryType>C#</RepositoryType>
     <Company>Codefarts</Company>
-  </PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <DebugSymbols>true</DebugSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat> </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json">
       <Link>stylecop.json</Link>
@@ -31,9 +33,9 @@
     </PackageReference>
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="buildhelper &amp;quot;-b:$(ProjectDir)$(ConfigurationName)-PreBuild.xml&amp;quot; &amp;quot;-p:$(ProjectPath)&amp;quot; &amp;quot;-tf:$(TargetFramework)&amp;quot;" />
+    <Exec Command="buildhelper &quot;-b:$(ProjectDir)$(ConfigurationName)-PreBuild.xml&quot; &quot;-p:$(ProjectPath)&quot; &quot;-tf:$(TargetFramework)&quot;" />
   </Target>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="buildhelper &amp;quot;-b:$(ProjectDir)$(ConfigurationName)-PostBuild.xml&amp;quot; &amp;quot;-p:$(ProjectPath)&amp;quot; &amp;quot;-tf:$(TargetFramework)&amp;quot;" />
+    <Exec Command="buildhelper &quot;-b:$(ProjectDir)$(ConfigurationName)-PostBuild.xml&quot; &quot;-p:$(ProjectPath)&quot; &quot;-tf:$(TargetFramework)&quot;" />
   </Target>
 </Project>

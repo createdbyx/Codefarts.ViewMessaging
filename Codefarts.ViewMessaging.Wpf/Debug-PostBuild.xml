@@ -1,8 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <build>
-  <!--    <deploy path="P:\Codefarts Assemblies\$(ProjectName)\Latest\$(ConfigurationName)\" clean="true" />-->
-  <!--<copydir source="$(ProjectDir)$(OutDir)" destination="P:\Codefarts Assemblies\$(ProjectName)\Latest\$(ConfigurationName)\" clean="true" />-->
-  <copydir source="$(ProjectDir)$(OutDir)..\" destination="P:\Codefarts Nuget Packages\" clean="false" allconditions="true" subfolders="false">
-    <condition value=".nupkg" operator="endswith" ignorecase="true" />
-  </copydir>
+    <!--    <deploy path="P:\Codefarts Assemblies\$(ProjectName)\Latest\$(ConfigurationName)\" clean="true" />-->
+    <!--<copydir source="$(ProjectDir)$(OutDir)" destination="P:\Codefarts Assemblies\$(ProjectName)\Latest\$(ConfigurationName)\" clean="true" />-->
+    <copydir source="$(ProjectDir)$(OutDir)..\" destination="P:\Codefarts Nuget Packages\" clean="false"
+             allconditions="true" subfolders="false">
+        <condition value=".nupkg" operator="endswith" ignorecase="true"/>
+    </copydir>
+
+    <updateversion ProjectFileName="$(ProjectPath)" retry="true" retrycount="50"/>
 </build>
