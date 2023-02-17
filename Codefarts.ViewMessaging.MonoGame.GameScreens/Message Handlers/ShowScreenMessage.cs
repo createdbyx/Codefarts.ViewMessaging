@@ -4,7 +4,8 @@
 // http://www.codefarts.com
 // </copyright>
 
-using BasicGameScreens;
+
+using Codefarts.ScreenManager;
 
 namespace Codefarts.ViewMessaging.MonoGame.GameScreens;
 
@@ -27,10 +28,10 @@ public class ShowScreenMessage : IViewMessage
             throw new ArgumentNullException(nameof(view));
         }
 
-        var ctrl = view.ViewReference as GameScreen;
+        var ctrl = view.ViewReference as IGameScreen;
         if (ctrl == null)
         {
-            throw new ArgumentException($"ViewReference property is not a {nameof(GameScreen)} type.", nameof(view));
+            throw new ArgumentException($"ViewReference property is not a {nameof(IGameScreen)} type.", nameof(view));
         }
 
         ctrl.ScreenManager.AddScreen(ctrl, null);
