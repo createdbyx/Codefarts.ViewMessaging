@@ -4,40 +4,38 @@
 // http://www.codefarts.com
 // </copyright>
 
-namespace ViewMessagingMonoGameScreens
+namespace ViewMessagingMonoGameScreens;
 
+using System;
+using Codefarts.DependencyInjection;
+using Codefarts.IoC;
+
+public class DependencyInjectorShim : IDependencyInjectionProvider
 {
-    using System;
-    using Codefarts.DependencyInjection;
-    using Codefarts.IoC;
+    private Container ioc;
 
-    public class DependencyInjectorShim : IDependencyInjectionProvider
+    public DependencyInjectorShim(Container ioc)
     {
-        private Container ioc;
+        this.ioc = ioc;
+    }
 
-        public DependencyInjectorShim(Container ioc)
-        {
-            this.ioc = ioc;
-        }
+    public void Register(Type key, Type concrete)
+    {
+        this.ioc.Register(key, concrete);
+    }
 
-        public void Register(Type key, Type concrete)
-        {
-            this.ioc.Register(key, concrete);
-        }
+    public void Register(Type key, Func<object> callback)
+    {
+        this.ioc.Register(key, () => callback());
+    }
+                                                                                
+    public object Resolve(Type type)
+    {
+        return this.ioc.Resolve(type);
+    }
 
-        public void Register(Type key, Func<object> callback)
-        {
-            this.ioc.Register(key, () => callback());
-        }
-
-        public object Resolve(Type type)
-        {
-            return this.ioc.Resolve(type);
-        }
-
-        public void ResolveMembers(object value)
-        {
-            this.ioc.ResolveMembers(value);
-        }
+    public void ResolveMembers(object value)
+    {
+        this.ioc.ResolveMembers(value);
     }
 }
