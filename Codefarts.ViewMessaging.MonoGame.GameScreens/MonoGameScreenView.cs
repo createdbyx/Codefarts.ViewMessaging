@@ -4,7 +4,7 @@
 // http://www.codefarts.com
 // </copyright>
 
-using BasicGameScreens;
+using Codefarts.ScreenManager;
 using Codefarts.ViewMessaging;
 
 namespace Codefarts.ViewMessaging.MonoGame.GameScreens;
@@ -17,7 +17,7 @@ using System;
 /// <seealso cref="Codefarts.ViewMessaging.IView" />
 public class MonoGameScreenView : IView
 {
-    private GameScreen screenReference;
+    private IGameScreen screenReference;
 
     /// <inheritdoc />
     public string ViewName { get; }
@@ -38,7 +38,7 @@ public class MonoGameScreenView : IView
         }
     }
 
-    public MonoGameScreenView(IViewService viewService, GameScreen screen, string viewName)
+    public MonoGameScreenView(IViewService viewService, IGameScreen screen, string viewName)
     {
         if (viewName == null)
         {
@@ -61,7 +61,7 @@ public class MonoGameScreenView : IView
         this.ViewName = viewName;
     }
 
-    public MonoGameScreenView(IViewService viewService, GameScreen screen, string viewName, ViewArguments args)
+    public MonoGameScreenView(IViewService viewService, IGameScreen screen, string viewName, ViewArguments args)
         : this(viewService, screen, viewName)
     {
         this.Arguments = args;

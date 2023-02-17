@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
-using BasicGameScreens;
+using System.Runtime.Loader;
 using Codefarts.DependencyInjection;
+using Codefarts.ScreenManager;
 
 namespace Codefarts.ViewMessaging.MonoGame.GameScreens;
 
@@ -11,13 +12,15 @@ public class MonoGameScreenViewService : IViewService, INotifyPropertyChanged
     /// The cache of previously created view types.
     /// </summary>
     /// <remarks>Only the type for the view is cached to prevent having to search thought the loaded assembly list to find it again.</remarks>
-    private static readonly Dictionary<string, Type> previouslyCreatedViews = new Dictionary<string, Type>();
+    private readonly Dictionary<string, Type> previouslyCreatedViews = new Dictionary<string, Type>();
 
     private IDictionary<string, IViewMessage> messageHandlers = new Dictionary<string, IViewMessage>();
     private readonly IDictionary<string, IView> viewReferences = new Dictionary<string, IView>();
-    private string appendedViewName = "View";
+    private string appendedViewName = "Screen";
+
     private List<Func<string, ViewArguments, IView>> handlerCallbacks = new List<Func<string, ViewArguments, IView>>();
-    ScreenManager screenManager;
+
+    //  IScreenManager screenManager;
     private readonly IDependencyInjectionProvider diProvider;
 
     /// <summary>
@@ -26,17 +29,28 @@ public class MonoGameScreenViewService : IViewService, INotifyPropertyChanged
     public event PropertyChangedEventHandler PropertyChanged;
 
     /// <summary>
-    /// Occurs every ime a view is created.
+    /// Gets a dictionary of currently registered views.
+    /// </summary>
+    public IDictionary<string, Type> RegisterdViews
+    {
+        get
+        {
+            return new Dictionary<string, Type>(this.previouslyCreatedViews);
+        }
+    }
+
+    /// <summary>
+    /// Occurs every time a view is created.
     /// </summary>
     public event EventHandler<ViewEventArgs> ViewCreated;
 
     /// <summary>
-    /// Occurs every ime a view is deleted.
+    /// Occurs every time a view is deleted.
     /// </summary>
     public event EventHandler<ViewEventArgs> BeforeViewDeleted;
 
     /// <summary>
-    /// Occurs every ime a view is deleted.
+    /// Occurs every time a view is deleted.
     /// </summary>
     public event EventHandler<ViewDeletedEventArgs> ViewDeleted;
 
@@ -48,11 +62,11 @@ public class MonoGameScreenViewService : IViewService, INotifyPropertyChanged
         }
 
         this.diProvider = provider;
-        this.screenManager = this.diProvider.Resolve<ScreenManager>();
-        this.screenManager.Game.Components.Add(this.screenManager);
+        //  this.screenManager = this.diProvider.Resolve<IScreenManager>();
+        //  this.screenManager.Game.Components.Add(this.screenManager);
 
         //  this.messageHandlers[GenericMessageConstants.ShowDialog] = new ShowDialogMessage();
-        this.messageHandlers[GenericMessageConstants.Show] = new ShowScreenMessage();
+        this.messageHandlers[GenericMessageConstants.Show] = provider.Resolve<ShowScreenMessage>();
         //  this.messageHandlers[GenericMessageConstants.SetModel] = new SetModelMessage();
         //  this.messageHandlers[GenericMessageConstants.Update] = new UpdateMessage();
         // this.messageHandlers[GenericMessageConstants.Refresh] = new RefreshMessage();
@@ -194,13 +208,8 @@ public class MonoGameScreenViewService : IViewService, INotifyPropertyChanged
                 continue;
             }
 
-#if NETCOREAPP3_1
-                var asmName = new AssemblyName(Path.GetFileNameWithoutExtension(asmFile));
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(asmName);
-#else
-            var assembly = Assembly.LoadFile(asmFile);
-#endif
-
+            var asmName = new AssemblyName(Path.GetFileNameWithoutExtension(asmFile));
+            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(asmName);
 
             if (this.GetViewType(viewName, args, assembly, name, cacheView, out wpfView))
             {
@@ -253,7 +262,7 @@ public class MonoGameScreenViewService : IViewService, INotifyPropertyChanged
 
             if (item != null)
             {
-                var element = item as GameScreen;
+                var element = item as IGameScreen;
                 var newView = new MonoGameScreenView(this, element, name, args == null ? null : new ViewArguments(args));
                 this.viewReferences.Add(newView.Id, newView);
 
@@ -282,7 +291,7 @@ public class MonoGameScreenViewService : IViewService, INotifyPropertyChanged
     {
         if (x.Name.Equals(name))
         {
-            return x.IsSubclassOf(typeof(GameScreen));
+            return x.IsSubclassOf(typeof(IGameScreen));
         }
 
         return false;
@@ -300,7 +309,7 @@ public class MonoGameScreenViewService : IViewService, INotifyPropertyChanged
             var item = firstView != null ? this.diProvider.Resolve(firstView) : null;
             if (item != null)
             {
-                var element = item as GameScreen;
+                var element = item as IGameScreen;
                 var newView = new MonoGameScreenView(this, element, dataTemplateName, args == null ? null : new ViewArguments(args));
                 this.viewReferences.Add(newView.Id, newView);
                 {
@@ -383,5 +392,26 @@ public class MonoGameScreenViewService : IViewService, INotifyPropertyChanged
         {
             handler(this, new ViewDeletedEventArgs(viewId));
         }
+    }
+
+    /// <summary>
+    /// Unregisters a view.
+    /// </summary>
+    /// <param name="viewName">The name of the view to unregister.</param>
+    public void UnregisterView(string viewName)
+    {
+        viewName = viewName.EndsWith(this.appendedViewName) ? viewName : viewName + this.appendedViewName;
+        this.previouslyCreatedViews.Remove(viewName);
+    }
+
+    /// <summary>
+    /// Registers a view for quicker instanciation.
+    /// </summary>
+    /// <param name="viewName">The name of the view to register.</param>
+    /// <param name="type">The type that is associated with the view.</param>
+    public void RegisterView(string viewName, Type type)
+    {
+        viewName = viewName.EndsWith(this.appendedViewName) ? viewName : viewName + this.appendedViewName;
+        this.previouslyCreatedViews[viewName] = type;
     }
 }
