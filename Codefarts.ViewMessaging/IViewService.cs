@@ -80,6 +80,24 @@ namespace Codefarts.ViewMessaging
         IView CreateView(string viewName, ViewArguments args);
 
         /// <summary>
+        /// Registers a view for quicker instanciation.
+        /// </summary>
+        /// <param name="viewName">The name of the view to register.</param>
+        /// <param name="type">The type that is associated with the view.</param>
+        void RegisterView(string viewName, Type type);
+
+        /// <summary>
+        /// Unregisters a view.
+        /// </summary>
+        /// <param name="viewName">The name of the view to unregister.</param>
+        void UnregisterView(string viewName);
+        
+        /// <summary>
+        /// Gets a dictionary of currently registered views.
+        /// </summary>
+        IDictionary<string, Type> RegisterdViews { get; }
+
+        /// <summary>
         /// Registers a callback handler for creating a view.
         /// </summary>
         /// <param name="callback">The callback to be called.</param>
