@@ -6,90 +6,76 @@
 //-----------------------------------------------------------------------------
 
 using System;
-using BasicGameScreens;
+using Codefarts.ScreenManager;
+using Codefarts.ScreenManager.MonoGame;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ViewMessagingMonoGameScreens
+namespace ViewMessagingMonoGameScreens;
+
+/// <summary>
+/// The background screen sits behind all the other menu screens.
+/// It draws a background image that remains fixed in place regardless
+/// of whatever transitions the screens on top of it may be doing.
+/// </summary>
+class BackgroundScreen : GameScreen
 {
+    ContentManager content;
+    Texture2D backgroundTexture;
+    private SpriteBatch spriteBatch;
+    private readonly Game game;
+
+
     /// <summary>
-    /// The background screen sits behind all the other menu screens.
-    /// It draws a background image that remains fixed in place regardless
-    /// of whatever transitions the screens on top of it may be doing.
+    /// Constructor.
     /// </summary>
-    class BackgroundScreen : GameScreen
+    public BackgroundScreen(IScreenManager manager, Game game) : base(manager)
     {
-        ContentManager content;
-        Texture2D backgroundTexture;
+        this.TransitionOnTime = TimeSpan.FromSeconds(0.5);
+        this.TransitionOffTime = TimeSpan.FromSeconds(0.5);
+        this.game = game ?? throw new ArgumentNullException(nameof(game));
+    }
 
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public BackgroundScreen()
-        {
-            this.TransitionOnTime = TimeSpan.FromSeconds(0.5);
-            this.TransitionOffTime = TimeSpan.FromSeconds(0.5);
-        }
+    /// <summary>
+    /// Loads graphics content for this screen. The background texture is quite
+    /// big, so we use our own local ContentManager to load it. This allows us
+    /// to unload before going from the menus into the game itself, wheras if we
+    /// used the shared ContentManager provided by the Game class, the content
+    /// would remain loaded forever.
+    /// </summary>
+    public override void LoadContent()
+    {
+        this.content ??= new ContentManager(this.game.Services, "Content");
+        this.spriteBatch = new SpriteBatch(game.GraphicsDevice);
+        this.backgroundTexture = this.content.Load<Texture2D>("background");
+    }
 
 
-        /// <summary>
-        /// Loads graphics content for this screen. The background texture is quite
-        /// big, so we use our own local ContentManager to load it. This allows us
-        /// to unload before going from the menus into the game itself, wheras if we
-        /// used the shared ContentManager provided by the Game class, the content
-        /// would remain loaded forever.
-        /// </summary>
-        public override void LoadContent()
-        {
-            if (this.content == null)
-            {
-                this.content = new ContentManager(this.ScreenManager.Game.Services, "Content");
-            }
+    /// <summary>
+    /// Unloads graphics content for this screen.
+    /// </summary>
+    public override void UnloadContent()
+    {
+        this.content.Unload();
+    }
 
-            this.backgroundTexture = this.content.Load<Texture2D>("background");
-        }
+    public override void Update(TimeSpan elapsedTime, TimeSpan totalTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+    {
+        base.Update(elapsedTime, totalTime, otherScreenHasFocus, false);
+    }
 
+    public override void Draw(TimeSpan elapsedTime, TimeSpan totalTime)
+    {
+        var viewport = this.game.GraphicsDevice.Viewport;
+        var fullscreen = new Rectangle(0, 0, viewport.Width, viewport.Height);
 
-        /// <summary>
-        /// Unloads graphics content for this screen.
-        /// </summary>
-        public override void UnloadContent()
-        {
-            this.content.Unload();
-        }
+        this.spriteBatch.Begin();
 
+        this.spriteBatch.Draw(this.backgroundTexture, fullscreen,
+                              new Color(this.TransitionAlpha, this.TransitionAlpha, this.TransitionAlpha));
 
-        /// <summary>
-        /// Updates the background screen. Unlike most screens, this should not
-        /// transition off even if it has been covered by another screen: it is
-        /// supposed to be covered, after all! This overload forces the
-        /// coveredByOtherScreen parameter to false in order to stop the base
-        /// Update method wanting to transition off.
-        /// </summary>
-        public override void Update(GameTime gameTime, bool otherScreenHasFocus,
-                                                       bool coveredByOtherScreen)
-        {
-            base.Update(gameTime, otherScreenHasFocus, false);
-        }
-
-
-        /// <summary>
-        /// Draws the background screen.
-        /// </summary>
-        public override void Draw(GameTime gameTime)
-        {
-            var spriteBatch = this.ScreenManager.SpriteBatch;
-            var viewport = this.ScreenManager.GraphicsDevice.Viewport;
-            var fullscreen = new Rectangle(0, 0, viewport.Width, viewport.Height);
-
-            spriteBatch.Begin();
-
-            spriteBatch.Draw(this.backgroundTexture, fullscreen,
-                             new Color(this.TransitionAlpha, this.TransitionAlpha, this.TransitionAlpha));
-
-            spriteBatch.End();
-        }
+        this.spriteBatch.End();
     }
 }
