@@ -5,10 +5,10 @@
     <Nullable>enable</Nullable>
     <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
     <LangVersion>default</LangVersion>
-    <AssemblyVersion>2023.2.3.0</AssemblyVersion>
-    <FileVersion>2023.2.3.0</FileVersion>
+    <AssemblyVersion>2023.2.9.5</AssemblyVersion>
+    <FileVersion>2023.2.9.5</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>2023.2.3.0</PackageVersion>
+    <PackageVersion>2023.2.9.5</PackageVersion>
     <Authors>Dean Lunz</Authors>
     <Copyright>Codefarts</Copyright>
     <PackageProjectUrl>https://github.com/createdbyx/Codefarts.ViewMessaging.git</PackageProjectUrl>

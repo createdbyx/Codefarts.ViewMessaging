@@ -6,10 +6,10 @@
     <TargetFrameworks>net6.0-windows</TargetFrameworks>
     <LangVersion>default</LangVersion>
     <RootNamespace>Codefarts.ViewMessaging.Wpf</RootNamespace>
-    <AssemblyVersion>2023.1.6.2</AssemblyVersion>
-    <FileVersion>2023.1.6.2</FileVersion>
+    <AssemblyVersion>2023.2.7.0</AssemblyVersion>
+    <FileVersion>2023.2.7.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>2023.1.6.2</PackageVersion>
+    <PackageVersion>2023.2.7.0</PackageVersion>
     <Title>Codefarts.ViewMessaging.Wpf</Title>
     <Authors>Dean Lunz</Authors>
     <Copyright>Codefarts</Copyright>
@@ -19,14 +19,15 @@
     <Company>Codefarts</Company>
     <IncludeSymbols>true</IncludeSymbols>
     <DebugSymbols>true</DebugSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat> </PropertyGroup>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json">
       <Link>stylecop.json</Link>
     </AdditionalFiles>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Codefarts.ViewMessaging" Version="2022.11.24" />
+    <PackageReference Include="Codefarts.ViewMessaging" Version="2023.1.6.5" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
