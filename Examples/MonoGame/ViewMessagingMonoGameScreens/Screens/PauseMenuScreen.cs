@@ -83,7 +83,7 @@ class PauseMenuScreen : MenuScreen
         {
             screen.ExitScreen();
         }
-
+ 
         var load = this.ioc.Resolve<LoadingScreen>();
         load.LoadingIsSlow = false;
 

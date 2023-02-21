@@ -43,7 +43,7 @@ class MessageBoxScreen : GameScreen
     /// Constructor automatically includes the standard "A=ok, B=cancel"
     /// usage text prompt.
     /// </summary>
-    public MessageBoxScreen(IScreenManager manager,  IDependencyInjectionProvider ioc) : base(manager)
+    public MessageBoxScreen(IScreenManager manager, IDependencyInjectionProvider ioc) : base(manager)
     {
         this.ioc = ioc ?? throw new ArgumentNullException(nameof(ioc));
         this.game = ioc.Resolve<Game>();
@@ -52,7 +52,7 @@ class MessageBoxScreen : GameScreen
 
         this.TransitionOnTime = TimeSpan.FromSeconds(0.2);
         this.TransitionOffTime = TimeSpan.FromSeconds(0.2);
-      
+
         this.input = ioc.Resolve<BindingCallbacksManager>();
         this.input.BindButtonRelease(Constants.MenuExit, e => this.OnCancelled(new PlayerIndexEventArgs((PlayerIndex)e.Player)));
         this.input.BindButtonRelease(Constants.MenuSelect, e => this.OnAccepted(new PlayerIndexEventArgs((PlayerIndex)e.Player)));
@@ -116,7 +116,6 @@ class MessageBoxScreen : GameScreen
     /// </summary>
     public override void Draw(TimeSpan elapsedTime, TimeSpan totalTime)
     {
-      
         // Center the message text in the viewport.
         var viewport = this.game.GraphicsDevice.Viewport;
         var viewportSize = new Vector2(viewport.Width, viewport.Height);
@@ -182,7 +181,7 @@ class MessageBoxScreen : GameScreen
         {
             return;
         }
-       
+
         this.Cancelled?.Invoke(this, e);
         this.ExitScreen();
     }

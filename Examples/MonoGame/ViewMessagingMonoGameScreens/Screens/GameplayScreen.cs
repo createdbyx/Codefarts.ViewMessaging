@@ -42,7 +42,7 @@ class GameplayScreen : GameScreen
     Texture2D blankTexture;
     private readonly BindingCallbacksManager input;
     private readonly IDependencyInjectionProvider ioc;
-    private float moveSpeed = 150f;
+    private float maxMovementSpeed = 150f;
 
 
     /// <summary>
@@ -66,7 +66,6 @@ class GameplayScreen : GameScreen
         this.input.Bind(Constants.MoveVerticaly, this.MoveVert);
         this.input.BindButtonRelease(Constants.Pause, this.Pause);
     }
-
 
     /// <summary>
     /// Load graphics content for the game.
@@ -132,12 +131,18 @@ class GameplayScreen : GameScreen
         // TODO: this game isn't very fun! You could probably improve
         // it by inserting something more interesting in this space :-)
 
-        if (this.playerDirection.Length() > 0)
-        {
-            this.playerDirection.Normalize();
-        }
-        
-        this.playerPosition += this.playerDirection * this.moveSpeed * (float)elapsedTime.TotalSeconds;
+        var normalizedDir = this.playerDirection;
+        // if (normalizedDir.Length() > 0)
+        // {
+        //     normalizedDir.Normalize();
+        // }
+
+        normalizedDir.X = (float)(Math.Clamp(normalizedDir.X * this.maxMovementSpeed, -this.maxMovementSpeed, this.maxMovementSpeed) *
+                                  elapsedTime.TotalSeconds);
+        normalizedDir.Y = (float)(Math.Clamp(normalizedDir.Y * this.maxMovementSpeed, -this.maxMovementSpeed, this.maxMovementSpeed) *
+                                  elapsedTime.TotalSeconds);
+
+        this.playerPosition += normalizedDir; // * (float)(this.maxMovementSpeed * elapsedTime.TotalSeconds);
     }
 
 
@@ -210,9 +215,9 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        // var speed = -data.Value * this.moveSpeed * data.ElapsedTime.Milliseconds;
+        // var speed = -data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
         // this.playerPosition.Y += speed;
-        this.playerDirection.Y = -data.RelativeValue;
+        this.playerDirection.Y += -data.RelativeValue; // != 0 ? -data.Value : this.playerDirection.Y;
     }
 
     public void MoveDown(BindingData data)
@@ -222,9 +227,9 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        // var speed = data.Value * this.moveSpeed * data.ElapsedTime.Milliseconds;
+        // var speed = data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
         // this.playerPosition.Y += speed;
-        this.playerDirection.Y = data.RelativeValue;
+        this.playerDirection.Y += data.RelativeValue; //!= 0 ? data.Value : this.playerDirection.Y;
     }
 
     public void MoveLeft(BindingData data)
@@ -233,11 +238,11 @@ class GameplayScreen : GameScreen
         {
             return;
         }
-                    
-        // var speed = -data.Value * this.moveSpeed * data.ElapsedTime.Milliseconds;
-        // this.playerDirection.X = -data.Value * this.moveSpeed * data.ElapsedTime.Milliseconds;
+
+        // var speed = -data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
+        // this.playerDirection.X = -data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
         // this.playerPosition += new Vector2(speed, 0);
-        this.playerDirection.X = data.RelativeValue!=0? -data.RelativeValue:this.playerDirection.X;
+        this.playerDirection.X += -data.RelativeValue;
     }
 
     public void MoveRight(BindingData data)
@@ -247,11 +252,11 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        //  var speed = data.Value * this.moveSpeed * data.ElapsedTime.Milliseconds;
-        //  this.playerDirection.X=  data.Value * this.moveSpeed * data.ElapsedTime.Milliseconds;
+        //  var speed = data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
+        //  this.playerDirection.X=  data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
         //  this.playerPosition += new Vector2(speed, 0);
-      //  this.playerDirection.X = data.RelativeValue;
-        this.playerDirection.X = data.RelativeValue!=0? data.RelativeValue:this.playerDirection.X;
+        //  this.playerDirection.X = data.RelativeValue;
+        this.playerDirection.X += data.RelativeValue;
     }
 
     private void MoveHoriz(BindingData data)
@@ -261,9 +266,9 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        //var speed = data.Value * this.moveSpeed * data.ElapsedTime.Milliseconds;
-        // this.playerDirection.X = (float)(data.Value * this.moveSpeed * data.ElapsedTime.TotalSeconds);
-        this.playerDirection.X += data.Value;
+        //var speed = data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
+        // this.playerDirection.X = (float)(data.Value * this.maxMovementSpeed * data.ElapsedTime.TotalSeconds);
+        this.playerDirection.X += data.RelativeValue; // != 0 ? data.Value : this.playerDirection.X;
     }
 
 
@@ -274,9 +279,9 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        //var speed = data.Value * this.moveSpeed * data.ElapsedTime.Milliseconds;
-        // this.playerDirection.Y = (float)(-data.Value * this.moveSpeed * data.ElapsedTime.TotalSeconds);
-        this.playerDirection.Y += -data.Value;
+        //var speed = data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
+        // this.playerDirection.Y = (float)(-data.Value * this.maxMovementSpeed * data.ElapsedTime.TotalSeconds);
+        this.playerDirection.Y += -data.RelativeValue; // != 0 ? -data.Value : this.playerDirection.Y;
     }
 
 
@@ -293,7 +298,7 @@ class GameplayScreen : GameScreen
         this.spriteBatch.Begin();
 
         this.spriteBatch.DrawString(this.gameFont, $"MoveSpeed: {this.playerDirection}\r\n" +
-                                                   $"speed: {this.moveSpeed}\r\n" +
+                                                   $"speed: {this.maxMovementSpeed}\r\n" +
                                                    $"{elapsedTime.TotalSeconds}\r\n" +
                                                    $"Dir: {this.playerDirection} - Pos: {this.playerPosition}", Vector2.Zero, Color.Red);
 

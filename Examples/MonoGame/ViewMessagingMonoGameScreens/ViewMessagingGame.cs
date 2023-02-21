@@ -48,7 +48,7 @@ public class ViewMessagingGame : Microsoft.Xna.Framework.Game
 
     protected override void Initialize()
     {
-        this.inputManager = new InputManager();
+        this.inputManager = this.provider.Resolve<InputManager>();
         this.provider.Register<InputManager>(() => this.inputManager);
         this.Services.AddService(this.inputManager);
 
