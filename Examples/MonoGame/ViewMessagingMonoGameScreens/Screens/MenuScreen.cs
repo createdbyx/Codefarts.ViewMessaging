@@ -112,47 +112,6 @@ abstract class MenuScreen : GameScreen
         this.content.Unload();
     }
 
-    /*
-  /// <summary>
-  /// Responds to user input, changing the selected entry and accepting
-  /// or cancelling the menu.
-  /// </summary>
-  public   void HandleInput(InputState input)
-  {
-      // Move to the previous menu entry?
-      if (input.IsMenuUp(this.ControllingPlayer))
-      {
-          this.selectedEntry--;
-
-          if (this.selectedEntry < 0) this.selectedEntry = this.menuEntries.Count - 1;
-      }
-
-      // Move to the next menu entry?
-      if (input.IsMenuDown(this.ControllingPlayer))
-      {
-          this.selectedEntry++;
-
-          if (this.selectedEntry >= this.menuEntries.Count) this.selectedEntry = 0;
-      }
-
-      // Accept or cancel the menu? We pass in our ControllingPlayer, which may
-      // either be null (to accept input from any player) or a specific index.
-      // If we pass a null controlling player, the InputState helper returns to
-      // us which player actually provided the input. We pass that through to
-      // OnSelectEntry and OnCancel, so they can tell which player triggered them.
-      PlayerIndex playerIndex;
-
-      if (input.IsMenuSelect(this.ControllingPlayer, out playerIndex))
-      {
-          this.OnSelectEntry(this.selectedEntry, playerIndex);
-      }
-      else if (input.IsMenuCancel(this.ControllingPlayer, out playerIndex))
-      {
-          this.OnCancel(playerIndex);
-      }
-  }
-           */
-
     /// <summary>
     /// Handler for when the user has chosen a menu entry.
     /// </summary>
@@ -251,10 +210,6 @@ abstract class MenuScreen : GameScreen
         // make sure our entries are in the right place before we draw them
         this.UpdateMenuEntryLocations();
 
-        //var graphics = this.ScreenManager.GraphicsDevice;
-        //var spriteBatch = this.ScreenManager.SpriteBatch;
-        //var font = this.ScreenManager.Font;
-
         this.spriteBatch.Begin();
 
         // Draw each menu entry in turn.
@@ -319,16 +274,6 @@ abstract class MenuScreen : GameScreen
         this.spriteBatch.DrawString(this.font, entry.Text, entry.Position, color, 0,
                                     origin, scale, SpriteEffects.None, 0);
     }
-
-
-    // /// <summary>
-    // /// Queries how much space this menu entry requires.
-    // /// </summary>
-    // public   int GetHeight(MenuScreen screen)
-    // {
-    //     return this.font.LineSpacing;
-    // }
-
 
     /// <summary>
     /// Queries how wide the entry is, used for centering on the screen.

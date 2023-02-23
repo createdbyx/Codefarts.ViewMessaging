@@ -5,7 +5,6 @@
 // </copyright>
 
 using Codefarts.ScreenManager;
-using Codefarts.ViewMessaging;
 
 namespace Codefarts.ViewMessaging.MonoGame.GameScreens;
 

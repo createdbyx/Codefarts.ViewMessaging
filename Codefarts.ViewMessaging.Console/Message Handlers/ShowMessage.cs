@@ -7,7 +7,6 @@
 namespace Codefarts.ViewMessaging.Console
 {
     using System;
-    using System.Windows;
 
     public class ShowMessage : IViewMessage
     {

@@ -3,8 +3,6 @@ using Codefarts.AppCore.Interfaces;
 using Codefarts.AppCore.SettingProviders.Xml;
 using Codefarts.DependencyInjection;
 using Codefarts.IoC;
-using Codefarts.ScreenManager;
-using Codefarts.ScreenManager.MonoGame;
 using Codefarts.ViewMessaging;
 using Codefarts.ViewMessaging.MonoGame.GameScreens;
 using ViewMessagingMonoGameScreens;

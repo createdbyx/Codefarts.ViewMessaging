@@ -55,26 +55,6 @@ class LoadingScreen : GameScreen
         this.content.RootDirectory = game.Content.RootDirectory;
     }
 
-
-    // /// <summary>
-    // /// Activates the loading screen.
-    // /// </summary>
-    // public static void Load(ScreenManager screenManager, bool loadingIsSlow,
-    //                         PlayerIndex? controllingPlayer,
-    //                         params GameScreen[] screensToLoad)
-    // {
-    //     // Tell all the current screens to transition off.
-    //     foreach (var screen in screenManager.GetScreens())
-    //         screen.ExitScreen();
-    //
-    //     // Create and activate the loading screen.
-    //     var loadingScreen = new LoadingScreen(screenManager,
-    //                                           loadingIsSlow,
-    //                                           screensToLoad);
-    //       
-    //     screenManager.AddScreen(loadingScreen, (int?)controllingPlayer);
-    // }
-
     public override void LoadContent()
     {
         this.spriteBatch = new SpriteBatch(this.game.GraphicsDevice);

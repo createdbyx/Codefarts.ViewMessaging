@@ -8,7 +8,6 @@
 using System;
 using Codefarts.DependencyInjection;
 using Codefarts.ScreenManager;
-using Microsoft.Xna.Framework;
 
 namespace ViewMessagingMonoGameScreens;
 

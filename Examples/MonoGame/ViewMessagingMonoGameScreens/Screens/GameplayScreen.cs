@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------------
 
 using System;
-using System.ComponentModel.Design;
 using System.Threading;
 using Codefarts.DependencyInjection;
 using Codefarts.Input;
@@ -16,7 +15,6 @@ using Codefarts.ScreenManager.MonoGame;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace ViewMessagingMonoGameScreens;
 
@@ -132,71 +130,14 @@ class GameplayScreen : GameScreen
         // it by inserting something more interesting in this space :-)
 
         var normalizedDir = this.playerDirection;
-        // if (normalizedDir.Length() > 0)
-        // {
-        //     normalizedDir.Normalize();
-        // }
 
         normalizedDir.X = (float)(Math.Clamp(normalizedDir.X * this.maxMovementSpeed, -this.maxMovementSpeed, this.maxMovementSpeed) *
                                   elapsedTime.TotalSeconds);
         normalizedDir.Y = (float)(Math.Clamp(normalizedDir.Y * this.maxMovementSpeed, -this.maxMovementSpeed, this.maxMovementSpeed) *
                                   elapsedTime.TotalSeconds);
 
-        this.playerPosition += normalizedDir; // * (float)(this.maxMovementSpeed * elapsedTime.TotalSeconds);
+        this.playerPosition += normalizedDir;  
     }
-
-
-    /*
-    /// <summary>
-    /// Lets the game respond to player input. Unlike the Update method,
-    /// this will only be called when the gameplay screen is active.
-    /// </summary>
-    public void HandleInput()
-    {
-        // Look up inputs for the active player profile.
-        var playerIndex = this.ControllingPlayer.Value;
-
-        var keyboardState = this.input.CurrentKeyboardStates[playerIndex];
-        var gamePadState = this.input.CurrentGamePadStates[playerIndex];
-
-        // The game pauses either if the user presses the pause button, or if
-        // they unplug the active gamepad. This requires us to keep track of
-        // whether a gamepad was ever plugged in, because we don't want to pause
-        // on PC if they are playing with a keyboard and have no gamepad at all!
-        var gamePadDisconnected = !gamePadState.IsConnected && this.input.GamePadWasConnected[playerIndex];
-
-        if (this.input.IsPauseGame((PlayerIndex?)this.ControllingPlayer) || gamePadDisconnected)
-        {
-            this.ScreenManager.AddScreen(new PauseMenuScreen(), this.ControllingPlayer);
-        }
-        else
-        {
-            // Otherwise move the player position.
-            var movement = Vector2.Zero;
-
-            if (keyboardState.IsKeyDown(Keys.Left))
-                movement.X--;
-
-            if (keyboardState.IsKeyDown(Keys.Right))
-                movement.X++;
-
-            if (keyboardState.IsKeyDown(Keys.Up))
-                movement.Y--;
-
-            if (keyboardState.IsKeyDown(Keys.Down))
-                movement.Y++;
-
-            var thumbstick = gamePadState.ThumbSticks.Left;
-
-            movement.X += thumbstick.X;
-            movement.Y -= thumbstick.Y;
-
-            if (movement.Length() > 1)
-                movement.Normalize();
-
-            this.playerPosition += movement * 2;
-        }
-    } */
 
     public void Pause(BindingData data)
     {
@@ -215,9 +156,7 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        // var speed = -data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
-        // this.playerPosition.Y += speed;
-        this.playerDirection.Y += -data.RelativeValue; // != 0 ? -data.Value : this.playerDirection.Y;
+        this.playerDirection.Y += -data.RelativeValue;  
     }
 
     public void MoveDown(BindingData data)
@@ -227,9 +166,7 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        // var speed = data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
-        // this.playerPosition.Y += speed;
-        this.playerDirection.Y += data.RelativeValue; //!= 0 ? data.Value : this.playerDirection.Y;
+        this.playerDirection.Y += data.RelativeValue;  
     }
 
     public void MoveLeft(BindingData data)
@@ -239,9 +176,6 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        // var speed = -data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
-        // this.playerDirection.X = -data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
-        // this.playerPosition += new Vector2(speed, 0);
         this.playerDirection.X += -data.RelativeValue;
     }
 
@@ -252,10 +186,6 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        //  var speed = data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
-        //  this.playerDirection.X=  data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
-        //  this.playerPosition += new Vector2(speed, 0);
-        //  this.playerDirection.X = data.RelativeValue;
         this.playerDirection.X += data.RelativeValue;
     }
 
@@ -266,9 +196,7 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        //var speed = data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
-        // this.playerDirection.X = (float)(data.Value * this.maxMovementSpeed * data.ElapsedTime.TotalSeconds);
-        this.playerDirection.X += data.RelativeValue; // != 0 ? data.Value : this.playerDirection.X;
+        this.playerDirection.X += data.RelativeValue;  
     }
 
 
@@ -279,9 +207,7 @@ class GameplayScreen : GameScreen
             return;
         }
 
-        //var speed = data.Value * this.maxMovementSpeed * data.ElapsedTime.Milliseconds;
-        // this.playerDirection.Y = (float)(-data.Value * this.maxMovementSpeed * data.ElapsedTime.TotalSeconds);
-        this.playerDirection.Y += -data.RelativeValue; // != 0 ? -data.Value : this.playerDirection.Y;
+        this.playerDirection.Y += -data.RelativeValue;  
     }
 
 
@@ -290,11 +216,6 @@ class GameplayScreen : GameScreen
     /// </summary>
     public override void Draw(TimeSpan elapsedTime, TimeSpan totalTime)
     {
-        // This game has a blue background. Why? Because!
-        // this.game.GraphicsDevice.Clear(ClearOptions.Target, Color.CornflowerBlue, 0, 0);
-
-        // Our player and enemy are both actually just text strings.
-
         this.spriteBatch.Begin();
 
         this.spriteBatch.DrawString(this.gameFont, $"MoveSpeed: {this.playerDirection}\r\n" +
@@ -325,13 +246,6 @@ class GameplayScreen : GameScreen
     public void FadeBackBufferToBlack(float alpha)
     {
         var viewport = this.game.GraphicsDevice.Viewport;
-
-        //  this.spriteBatch.Begin();
-
-        this.spriteBatch.Draw(this.blankTexture,
-                              new Rectangle(0, 0, viewport.Width, viewport.Height),
-                              Color.Black * alpha);
-
-        //  this.spriteBatch.End();
+        this.spriteBatch.Draw(this.blankTexture, new Rectangle(0, 0, viewport.Width, viewport.Height), Color.Black * alpha);
     }
 }
