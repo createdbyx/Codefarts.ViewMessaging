@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bindings>
+    <bind name="MoveUp" inputsource="Keyboard" source="W" />
+    <bind name="MoveDown" inputsource="Keyboard" source="S" />
+    <bind name="MoveLeft" inputsource="Keyboard" source="A" />
+    <bind name="MoveRight" inputsource="Keyboard" source="D" />
+    <bind name="Pause" inputsource="Keyboard" source="Escape" />
+
+    <bind name="MoveUp" inputsource="GamePad" source="Up" />
+    <bind name="MoveDown" inputsource="GamePad" source="Down" />
+    <bind name="MoveLeft" inputsource="GamePad" source="Left" />
+    <bind name="MoveRight" inputsource="GamePad" source="Right" />
+    <bind name="MoveHorizontialy" inputsource="GamePad" source="LeftThumbStickX" />
+    <bind name="MoveVerticaly" inputsource="GamePad" source="LeftThumbStickY" />
+    <bind name="Pause" inputsource="GamePad" source="Start" />
+
+    <bind name="MenuUp" inputsource="Keyboard" source="Up" />
+    <bind name="MenuDown" inputsource="Keyboard" source="Down" />
+    <bind name="MenuExit" inputsource="Keyboard" source="Escape" />
+    <bind name="MenuSelect" inputsource="Keyboard" source="Enter" />
+
+    <bind name="MenuUp" inputsource="GamePad" source="Up" />
+    <bind name="MenuDown" inputsource="GamePad" source="Down" />
+    <bind name="MenuExit" inputsource="GamePad" source="B" />
+    <bind name="MenuSelect" inputsource="GamePad" source="A" />
+</bindings>

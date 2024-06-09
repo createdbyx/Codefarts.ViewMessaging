@@ -5,8 +5,11 @@
 // </copyright>
 
 using System;
+using System.IO;
+using System.Linq;
 using Codefarts.DependencyInjection;
 using Codefarts.Input;
+using Codefarts.Input.Interfaces;
 using Codefarts.Input.MonoGameSources;
 using Codefarts.ScreenManager;
 using Codefarts.ScreenManager.MonoGame;
@@ -75,8 +78,15 @@ public class ViewMessagingGame : Microsoft.Xna.Framework.Game
         var kbSource = new KeyboardSource();
         var gpSource = new GamePadSource();
 
-        this.inputManager.AddSource(kbSource);
-        this.inputManager.AddSource(gpSource);
+        this.inputManager.InputSources.Add(kbSource);
+        this.inputManager.InputSources.Add(gpSource);
+        var reader = new BindingsReader(this.GetInputSource);
+
+        var bindingFile = Path.Combine(this.Content.RootDirectory, "bindings.xml");
+        reader.Read(bindingFile);
+
+        this.inputManager.Bindings.AddRange(reader.Bindings);
+        /*
         this.inputManager.Bind(Constants.MoveUp, kbSource, "W");
         this.inputManager.Bind(Constants.MoveDown, kbSource, "S");
         this.inputManager.Bind(Constants.MoveLeft, kbSource, "A");
@@ -100,6 +110,17 @@ public class ViewMessagingGame : Microsoft.Xna.Framework.Game
         this.inputManager.Bind(Constants.MenuDown, gpSource, "Down");
         this.inputManager.Bind(Constants.MenuExit, gpSource, "B");
         this.inputManager.Bind(Constants.MenuSelect, gpSource, "A");
+        */
+    }
+
+    private IInputSource GetInputSource(string inputSourceName)
+    {
+        return this.inputManager.InputSources.FirstOrDefault(
+            inputSource =>
+            {
+                var comparison = StringComparison.InvariantCultureIgnoreCase;
+                return inputSource.Name.Equals(inputSourceName, comparison);
+            });
     }
 
     protected override void Update(GameTime gameTime)
