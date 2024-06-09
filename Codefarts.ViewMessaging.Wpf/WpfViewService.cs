@@ -398,12 +398,8 @@ namespace Codefarts.ViewMessaging
                     continue;
                 }
 
-//#if NETCOREAPP3_1
-                //var asmName = new AssemblyName(Path.GetFileNameWithoutExtension(asmFile));
                 var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(asmFile);
-// #else
-//                 var assembly = Assembly.LoadFile(asmFile);
-// #endif
+
                 if (isDataTemplate)
                 {
                     var resourceNames = assembly.GetManifestResourceNames();
@@ -489,6 +485,7 @@ namespace Codefarts.ViewMessaging
             }
             catch
             {
+                // ignored
             }
 
             wpfView = null;
