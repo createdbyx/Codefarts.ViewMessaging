@@ -91,7 +91,7 @@ namespace Codefarts.ViewMessaging
         /// </summary>
         /// <param name="viewName">The name of the view to unregister.</param>
         void UnregisterView(string viewName);
-        
+
         /// <summary>
         /// Gets a dictionary of currently registered views.
         /// </summary>

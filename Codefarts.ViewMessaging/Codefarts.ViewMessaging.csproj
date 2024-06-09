@@ -3,12 +3,12 @@
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net5.0;net6.0;net8.0</TargetFrameworks>
     <LangVersion>default</LangVersion>
-    <AssemblyVersion>2023.2.9.5</AssemblyVersion>
-    <FileVersion>2023.2.9.5</FileVersion>
+    <AssemblyVersion>2024.6.8.14</AssemblyVersion>
+    <FileVersion>2024.6.8.14</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>2023.2.9.5</PackageVersion>
+    <PackageVersion>2024.6.8.14</PackageVersion>
     <Authors>Dean Lunz</Authors>
     <Copyright>Codefarts</Copyright>
     <PackageProjectUrl>https://github.com/createdbyx/Codefarts.ViewMessaging.git</PackageProjectUrl>
