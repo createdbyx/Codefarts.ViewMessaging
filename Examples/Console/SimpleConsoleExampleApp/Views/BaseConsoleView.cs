@@ -68,7 +68,7 @@ namespace SimpleConsoleExampleApp
 
         private void Draw()
         {
-            Console.Clear();
+            Console.Clear();          
             this.DrawMenu();
         }
 

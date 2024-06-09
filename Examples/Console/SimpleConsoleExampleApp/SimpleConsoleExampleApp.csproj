@@ -5,6 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyVersion>2021.4.1.2</AssemblyVersion>
     <FileVersion>2021.4.1.2</FileVersion>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

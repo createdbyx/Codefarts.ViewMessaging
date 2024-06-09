@@ -32,7 +32,10 @@ namespace SimpleConsoleExampleApp
             public void Run()
             {
                 var menu = this.viewService.CreateView("MainMenu");
-                Console.CursorVisible = false;
+                if (Console.WindowHeight > 0 && Console.WindowWidth > 0)
+                {
+                    Console.CursorVisible = false;
+                }
                 this.viewService.SendMessage(GenericMessageConstants.Show, menu, null);
 
                 this.isRunning = true;
