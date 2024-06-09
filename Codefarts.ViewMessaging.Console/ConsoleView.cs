@@ -72,5 +72,16 @@ namespace Codefarts.ViewMessaging
         {
             this.Arguments = args;
         }
+
+        public override string ToString()
+        {
+            // return the view name otherwise the base implementation
+            if (this.ViewName != null)
+            {
+                return this.ViewName;
+            }
+            
+            return base.ToString();
+        }
     }
 }
