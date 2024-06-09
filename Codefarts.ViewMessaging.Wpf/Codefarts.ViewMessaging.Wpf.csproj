@@ -3,13 +3,13 @@
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <TargetFrameworks>net6.0-windows</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net5.0-windows;net8.0-windows</TargetFrameworks>
     <LangVersion>default</LangVersion>
     <RootNamespace>Codefarts.ViewMessaging.Wpf</RootNamespace>
-    <AssemblyVersion>2023.2.7.0</AssemblyVersion>
-    <FileVersion>2023.2.7.0</FileVersion>
+    <AssemblyVersion>2024.6.8.2</AssemblyVersion>
+    <FileVersion>2024.6.8.2</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>2023.2.7.0</PackageVersion>
+    <PackageVersion>2024.6.8.2</PackageVersion>
     <Title>Codefarts.ViewMessaging.Wpf</Title>
     <Authors>Dean Lunz</Authors>
     <Copyright>Codefarts</Copyright>
@@ -27,7 +27,7 @@
     </AdditionalFiles>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Codefarts.ViewMessaging" Version="2023.1.6.5" />
+    <PackageReference Include="Codefarts.ViewMessaging" Version="2024.6.8.8" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
