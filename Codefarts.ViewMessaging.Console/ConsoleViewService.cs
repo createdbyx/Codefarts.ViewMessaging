@@ -58,6 +58,17 @@ namespace Codefarts.ViewMessaging
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Gets a dictionary of currently registered views.
+        /// </summary>
+        public IDictionary<string, Type> RegisterdViews
+        {
+            get
+            {
+                return previouslyCreatedViews;
+            }
+        }
+
         /// <inheritdoc/>
         public event EventHandler<ViewEventArgs> ViewCreated;
 
@@ -72,7 +83,10 @@ namespace Codefarts.ViewMessaging
         /// </summary>
         public string AppendedViewModelName
         {
-            get { return this.appendedViewModelName; }
+            get
+            {
+                return this.appendedViewModelName;
+            }
 
             set
             {
@@ -90,7 +104,10 @@ namespace Codefarts.ViewMessaging
         /// </summary>
         public bool MvvmEnabled
         {
-            get { return this.mVVMEnabled; }
+            get
+            {
+                return this.mVVMEnabled;
+            }
 
             set
             {
@@ -106,12 +123,18 @@ namespace Codefarts.ViewMessaging
         /// <inheritdoc/>
         public IEnumerable<IView> Views
         {
-            get { return this.viewReferences.Values; }
+            get
+            {
+                return this.viewReferences.Values;
+            }
         }
 
         public string AppendedViewName
         {
-            get { return this.appendedViewName; }
+            get
+            {
+                return this.appendedViewName;
+            }
 
             set
             {
@@ -191,6 +214,25 @@ namespace Codefarts.ViewMessaging
             return null;
         }
 
+        /// <summary>
+        /// Registers a view for quicker instanciation.
+        /// </summary>
+        /// <param name="viewName">The name of the view to register.</param>
+        /// <param name="type">The type that is associated with the view.</param>
+        public void RegisterView(string viewName, Type type)
+        {
+            previouslyCreatedViews.Add(viewName, type);
+        }
+
+        /// <summary>
+        /// Unregisters a view.
+        /// </summary>
+        /// <param name="viewName">The name of the view to unregister.</param>
+        public void UnregisterView(string viewName)
+        {
+            previouslyCreatedViews.Remove(viewName);
+        }
+
         public void SetViewModelAndReturn(ViewArguments args, string viewModelName, bool scanForAssemblies, bool useCache, IView wpfView)
         {
             var model = args.Get<object>(GenericMessageConstants.SetModel, null);
@@ -218,7 +260,10 @@ namespace Codefarts.ViewMessaging
 
         public IDictionary<string, IViewMessage> MessageHandlers
         {
-            get { return this.messageHandlers; }
+            get
+            {
+                return this.messageHandlers;
+            }
         }
 
         public void SendMessage(string message, IView view, ViewArguments args)
