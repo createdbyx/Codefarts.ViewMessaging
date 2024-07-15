@@ -103,7 +103,7 @@ namespace Codefarts.ViewMessaging
         /// <param name="callback">The callback to be called.</param>
         /// <remarks>Before invoking internal view creation implementors should defer creation by calling each registered callback until
         /// a view is created. If no view was created fallback to internal view creation. This gives consumers ability to specify special
-        /// case view creation for whatever platform they running on.</remarks>
+        /// case view creation for whatever platform they're running on.</remarks>
         void RegisterHandler(Func<string, ViewArguments, IView> callback);
 
         /// <summary>
